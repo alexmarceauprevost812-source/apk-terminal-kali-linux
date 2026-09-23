@@ -1,0 +1,8 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# Lance l'installation complète du Terminal Magique (outils, Debian, moteur d'IA).
+MAGIE="/data/data/com.termux/files/usr/share/magie"
+if [ ! -f "$MAGIE/install.sh" ]; then
+  echo "✖ $MAGIE introuvable : lancez install.sh depuis le dossier du dépôt." >&2
+  exit 1
+fi
+exec bash "$MAGIE/install.sh" "$@"

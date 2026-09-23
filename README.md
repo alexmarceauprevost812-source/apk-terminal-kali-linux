@@ -11,36 +11,43 @@ une fois téléchargées, sans compte et sans abonnement.
 
 ---
 
-## 1. Installer l'APK du terminal (Termux)
+## 1. Installer l'APK « Terminal Magique » (recommandé)
 
-Termux est l'APK de terminal Linux open source utilisée comme base.
+1. Sur le téléphone, ouvrez la page **Releases** du dépôt :
+   <https://github.com/alexmarceauprevost812-source/apk-terminal-linux-/releases/latest>
+2. Téléchargez **`terminal-magique-…-arm64-v8a.apk`** (pour le S25 Ultra).
+3. Ouvrez le fichier et autorisez « Installer des applis inconnues » si Android le demande.
+4. Lancez **Terminal Magique** : le thème noir / vert lime et les commandes `magie` et `ia`
+   sont déjà dedans. L'appli propose ensuite d'installer Debian et le moteur d'IA,
+   puis de télécharger une IA gratuite.
 
-> ⚠️ **N'installez pas Termux depuis le Play Store** (version obsolète).
+> ⚠️ L'APK est basée sur Termux (même nom de paquet `com.termux`) :
+> **désinstallez Termux s'il est déjà installé** avant d'installer Terminal Magique.
+> Play Protect peut afficher un avertissement (appli hors Play Store) : choisissez « Installer quand même ».
 
-1. Téléchargez l'APK depuis **F-Droid** : <https://f-droid.org/packages/com.termux/>
-   ou depuis **GitHub** : <https://github.com/termux/termux-app/releases>
-   (fichier `termux-app_…_arm64-v8a.apk` pour le S25 Ultra)
-2. Autorisez « Installer des applis inconnues » quand Android le demande.
-3. (Optionnel) Installez aussi **Termux:API** depuis la même source pour la batterie, les notifications, etc.
+Si vous refusez l'installation au premier lancement, tapez plus tard `magie-installer`.
 
-## 2. Installation magique (une seule commande)
+### Comment l'APK est construite
 
-Ouvrez Termux et collez :
+`apk/construire.sh` télécharge le code source officiel de Termux (version figée),
+change le nom de l'appli et les couleurs par défaut, ajoute nos scripts dans
+l'environnement Linux de base, puis compile l'APK. Le workflow GitHub Actions
+`.github/workflows/apk.yml` le lance à chaque modification de la branche `main`
+et publie les APK dans **Releases** (on peut aussi le lancer à la main depuis l'onglet Actions).
+
+## 2. Autre méthode : Termux + script
+
+Si vous préférez l'appli Termux officielle
+([F-Droid](https://f-droid.org/packages/com.termux/) ou
+[GitHub](https://github.com/termux/termux-app/releases), pas le Play Store), ouvrez-la et collez :
 
 ```bash
 pkg install -y git && git clone https://github.com/alexmarceauprevost812-source/apk-terminal-linux-.git && cd apk-terminal-linux- && bash install.sh
 ```
 
-L'installateur :
-
-1. met Termux à jour ;
-2. installe les outils Linux (git, python, nodejs, clang, vim, htop, tmux…) ;
-3. donne accès aux fichiers du téléphone (`~/storage`) ;
-4. installe le moteur d'IA **Ollama** ;
-5. installe **Debian** (Linux complet) ;
-6. applique le **thème noir / vert lime** et installe les commandes `magie` et `ia`.
-
-Fermez puis rouvrez Termux pour voir le thème.
+L'installateur met Termux à jour, installe les outils Linux (git, python, nodejs, clang,
+vim, htop, tmux…), donne accès aux fichiers du téléphone, installe **Ollama** et **Debian**,
+applique le thème et installe les commandes `magie` et `ia`.
 Pour ne pas installer Debian : `bash install.sh --no-debian`
 
 ## 3. Télécharger une IA gratuite
@@ -103,6 +110,11 @@ et restent ensuite **100 % hors-ligne** sur le téléphone.
 install.sh              installateur
 bin/magie               menu magique
 bin/ia                  question rapide à l'IA
+bin/magie-installer     installation complète (depuis l'APK)
+apk/construire.sh       construit l'APK Terminal Magique
+apk/premier-demarrage.sh accueil au premier lancement de l'APK
+apk/zz-magie.sh         déclenche l'accueil (etc/profile.d)
+.github/workflows/apk.yml compilation automatique + Releases
 config/modeles.txt      liste des IA gratuites proposées
 config/colors.properties thème Termux noir / vert lime
 config/theme.bashrc     invite : saisie blanche, sorties vert lime

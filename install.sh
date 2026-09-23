@@ -4,15 +4,18 @@
 #  Installe : outils Linux, Debian complet (proot), IA locales gratuites (Ollama)
 #  Usage :  bash install.sh            (installation complète)
 #           bash install.sh --no-debian (sans la distribution Debian)
+#           bash install.sh --config-seulement (thème + commandes, sans téléchargement)
 # ============================================================================
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 INSTALL_DEBIAN=1
+CONFIG_SEULEMENT=0
 for arg in "$@"; do
   case "$arg" in
     --no-debian) INSTALL_DEBIAN=0 ;;
+    --config-seulement) CONFIG_SEULEMENT=1 ;;
   esac
 done
 
@@ -28,6 +31,7 @@ if [ ! -d /data/data/com.termux ]; then
   exit 1
 fi
 
+if [ "$CONFIG_SEULEMENT" -eq 0 ]; then
 cat <<'EOF'
 
    ╔══════════════════════════════════════════════╗
@@ -74,6 +78,7 @@ if [ "$INSTALL_DEBIAN" -eq 1 ]; then
 else
   etape "5/6 Debian ignoré (--no-debian)"
 fi
+fi # fin des étapes 1 à 5 (sautées avec --config-seulement)
 
 etape "6/6 Thème noir / vert lime et commandes magiques"
 mkdir -p "$HOME/.termux"
@@ -104,6 +109,8 @@ echo -e "\033[1;35m🪄 Tapez 'magie' pour le menu, ou 'ia \"votre question\"'\0
 EOF
 fi
 ok "Commandes installées : magie, ia"
+
+[ "$CONFIG_SEULEMENT" -eq 1 ] && exit 0
 
 cat <<EOF
 
