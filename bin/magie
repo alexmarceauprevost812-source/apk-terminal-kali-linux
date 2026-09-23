@@ -1,0 +1,197 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# magie — menu principal du Terminal Linux Magique
+#   magie               → menu interactif
+#   magie <commande>    → action directe (voir « magie aide »)
+set -uo pipefail
+
+DOSSIER="$HOME/.magie"
+LISTE="$DOSSIER/modeles.txt"
+ACTIF="$DOSSIER/modele_actif"
+mkdir -p "$DOSSIER"
+
+violet='\033[1;35m'; cyan='\033[1;36m'; vert='\033[1;32m'; jaune='\033[1;33m'; fin='\033[0m'
+
+modele_actif() { cat "$ACTIF" 2>/dev/null || echo "llama3.2:3b"; }
+
+serveur_ia() {
+  if ! curl -s --max-time 2 http://127.0.0.1:11434/api/version >/dev/null 2>&1; then
+    echo -e "${jaune}➜ Démarrage du moteur d'IA…${fin}"
+    nohup ollama serve >"$DOSSIER/ollama.log" 2>&1 &
+    for _ in $(seq 1 30); do
+      curl -s --max-time 1 http://127.0.0.1:11434/api/version >/dev/null 2>&1 && return 0
+      sleep 0.5
+    done
+    echo "✖ Échec du démarrage (voir $DOSSIER/ollama.log)"; return 1
+  fi
+}
+
+lignes_modeles() { grep -v '^#' "$LISTE" | grep -v '^[[:space:]]*$'; }
+
+liste_modeles() {
+  echo -e "${cyan}IA gratuites disponibles :${fin}"
+  local i=1 installes
+  installes="$(ollama list 2>/dev/null | awk 'NR>1{print $1}')"
+  while IFS='|' read -r nom taille desc; do
+    local etat="  "
+    if grep -qFx -e "$nom" -e "$nom:latest" <<<"$installes"; then etat="✅"; fi
+    [ "$nom" = "$(modele_actif)" ] && etat="⭐"
+    printf " %s %2d) %-18s %-7s %s\n" "$etat" "$i" "$nom" "$taille" "$desc"
+    i=$((i + 1))
+  done < <(lignes_modeles)
+  echo -e "\n ✅ = téléchargé   ⭐ = modèle actif"
+}
+
+choisir_modele() {
+  liste_modeles >&2
+  echo >&2
+  read -rp "Numéro du modèle (ou nom Ollama) : " choix
+  [ -z "$choix" ] && return 1
+  if [[ "$choix" =~ ^[0-9]+$ ]]; then
+    lignes_modeles | sed -n "${choix}p" | cut -d'|' -f1
+  else
+    echo "$choix"
+  fi
+}
+
+telecharger() {
+  serveur_ia || return
+  local m="${1:-}"
+  [ -z "$m" ] && m="$(choisir_modele)" || true
+  [ -z "$m" ] && return
+  echo -e "${violet}🪄 Téléchargement de $m…${fin}"
+  ollama pull "$m" && echo "$m" > "$ACTIF" && echo -e "${vert}✔ $m prêt et activé${fin}"
+}
+
+activer() {
+  local m
+  m="$(choisir_modele)" || return
+  [ -n "$m" ] && echo "$m" > "$ACTIF" && echo -e "${vert}⭐ Modèle actif : $m${fin}"
+}
+
+supprimer() {
+  serveur_ia || return
+  ollama list
+  read -rp "Nom du modèle à supprimer : " m
+  [ -n "$m" ] && ollama rm "$m"
+}
+
+installer_ia() {
+  echo -e "${violet}🪄 Installation d'un pack d'IA gratuites${fin}"
+  echo " 1) Léger     : llama3.2:3b                         (~2 Go)"
+  echo " 2) Complet   : llama3.2:3b + gemma3:4b + qwen2.5-coder:3b (~7 Go)"
+  echo " 3) Mini      : llama3.2:1b                         (~1,3 Go)"
+  read -rp "Votre choix [1] : " p
+  case "${p:-1}" in
+    2) for m in llama3.2:3b gemma3:4b qwen2.5-coder:3b; do telecharger "$m"; done; echo "llama3.2:3b" > "$ACTIF" ;;
+    3) telecharger llama3.2:1b ;;
+    *) telecharger llama3.2:3b ;;
+  esac
+}
+
+serveur_web() {
+  serveur_ia || return
+  echo -e "${vert}✔ API d'IA disponible sur http://127.0.0.1:11434${fin}"
+  echo "  Compatible avec les applis Android « Ollama » (ex. Ollama App, Maid)."
+  echo "  Pour arrêter : magie stop"
+}
+
+stop_ia() { pkill -f "ollama serve" && echo "✔ Moteur d'IA arrêté" || echo "Le moteur n'était pas lancé"; }
+
+linux() {
+  if ! command -v proot-distro >/dev/null 2>&1; then
+    echo "✖ proot-distro absent. Relancez install.sh"; return 1
+  fi
+  echo -e "${violet}🐧 Entrée dans Debian — tapez 'exit' pour revenir${fin}"
+  proot-distro login debian --shared-tmp
+}
+
+infos() {
+  command -v fastfetch >/dev/null 2>&1 && fastfetch || uname -a
+  echo
+  echo -e "${cyan}Modèle IA actif :${fin} $(modele_actif)"
+  echo -e "${cyan}Espace libre     :${fin} $(df -h "$HOME" | awk 'NR==2{print $4}')"
+  if command -v termux-battery-status >/dev/null 2>&1; then
+    echo -e "${cyan}Batterie         :${fin} $(termux-battery-status 2>/dev/null | jq -r '"\(.percentage)% (\(.status))"' 2>/dev/null)"
+  fi
+}
+
+mise_a_jour() {
+  yes | pkg upgrade -y
+  command -v proot-distro >/dev/null 2>&1 && proot-distro login debian -- bash -c "apt update && apt upgrade -y" || true
+  echo -e "${vert}✔ Tout est à jour${fin}"
+}
+
+aide() {
+  cat <<EOF
+🪄 magie — Terminal Linux Magique
+
+  magie                  menu interactif
+  magie chat             discuter avec l'IA active
+  magie installer-ia     installer un pack d'IA gratuites
+  magie modeles          voir / télécharger des IA
+  magie activer          changer d'IA active
+  magie supprimer        supprimer une IA (libérer de la place)
+  magie serveur          lancer l'API IA pour d'autres applis
+  magie stop             arrêter le moteur d'IA
+  magie linux            entrer dans Debian (Linux complet)
+  magie infos            infos du téléphone
+  magie maj              tout mettre à jour
+  ia "question"          réponse rapide de l'IA
+EOF
+}
+
+menu() {
+  while true; do
+    clear
+    echo -e "${violet}"
+    cat <<'EOF'
+   ╔══════════════════════════════════════════╗
+   ║    🪄  TERMINAL LINUX MAGIQUE  🪄          ║
+   ╚══════════════════════════════════════════╝
+EOF
+    echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
+    echo "   1) 🤖 Discuter avec l'IA"
+    echo "   2) 📦 Installer un pack d'IA gratuites"
+    echo "   3) 📚 Voir / télécharger des IA"
+    echo "   4) ⭐ Changer d'IA active"
+    echo "   5) 🗑  Supprimer une IA"
+    echo "   6) 🌐 Lancer l'API IA (pour d'autres applis)"
+    echo "   7) 🐧 Entrer dans Linux Debian"
+    echo "   8) 📱 Infos du téléphone"
+    echo "   9) 🔄 Tout mettre à jour"
+    echo "   0) 🚪 Quitter"
+    echo
+    read -rp "   Votre choix : " c
+    case "$c" in
+      1) ia ;;
+      2) installer_ia ;;
+      3) liste_modeles; echo; read -rp "Télécharger un modèle ? (o/N) " r; [[ "$r" =~ ^[oOyY] ]] && telecharger ;;
+      4) activer ;;
+      5) supprimer ;;
+      6) serveur_web ;;
+      7) linux ;;
+      8) infos ;;
+      9) mise_a_jour ;;
+      0|q) exit 0 ;;
+      *) echo "Choix inconnu" ;;
+    esac
+    echo; read -rp "   Entrée pour revenir au menu…" _
+  done
+}
+
+case "${1:-}" in
+  "") menu ;;
+  chat) shift; exec ia "$@" ;;
+  installer-ia) installer_ia ;;
+  modeles) serveur_ia && liste_modeles && { read -rp "Télécharger un modèle ? (o/N) " r; [[ "$r" =~ ^[oOyY] ]] && telecharger; true; } ;;
+  telecharger) telecharger "${2:-}" ;;
+  activer) activer ;;
+  supprimer) supprimer ;;
+  serveur) serveur_web ;;
+  stop) stop_ia ;;
+  linux) linux ;;
+  infos) infos ;;
+  maj) mise_a_jour ;;
+  aide|-h|--help) aide ;;
+  *) echo "Commande inconnue : $1"; aide; exit 1 ;;
+esac

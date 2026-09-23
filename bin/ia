@@ -1,0 +1,50 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# ia — pose une question à l'IA locale (Ollama), ou ouvre une discussion.
+#   ia                      → discussion interactive
+#   ia "question"           → réponse unique
+#   ia -m gemma3:4b "..."   → choisir le modèle
+#   cat fichier | ia "résume ce texte"
+set -euo pipefail
+
+CONF="$HOME/.magie/modele_actif"
+MODELE="$(cat "$CONF" 2>/dev/null || echo llama3.2:3b)"
+
+if [ "${1:-}" = "-m" ]; then
+  MODELE="${2:?Précisez un modèle après -m}"
+  shift 2
+fi
+
+demarrer_serveur() {
+  if ! curl -s --max-time 2 http://127.0.0.1:11434/api/version >/dev/null 2>&1; then
+    mkdir -p "$HOME/.magie"
+    nohup ollama serve >"$HOME/.magie/ollama.log" 2>&1 &
+    for _ in $(seq 1 30); do
+      curl -s --max-time 1 http://127.0.0.1:11434/api/version >/dev/null 2>&1 && return 0
+      sleep 0.5
+    done
+    echo "✖ Le serveur d'IA ne démarre pas (voir ~/.magie/ollama.log)" >&2
+    exit 1
+  fi
+}
+
+demarrer_serveur
+
+INSTALLES="$(ollama list 2>/dev/null | awk 'NR>1{print $1}')"
+if ! grep -qFx -e "$MODELE" -e "$MODELE:latest" <<<"$INSTALLES"; then
+  echo "🪄 Le modèle '$MODELE' n'est pas encore téléchargé. Téléchargement…"
+  ollama pull "$MODELE"
+fi
+
+if [ $# -eq 0 ] && [ -t 0 ]; then
+  echo -e "\033[1;35m🤖 Discussion avec $MODELE — tapez /bye pour quitter\033[0m"
+  exec ollama run "$MODELE"
+fi
+
+QUESTION="$*"
+if [ ! -t 0 ]; then
+  ENTREE="$(cat)"
+  QUESTION="${QUESTION}
+
+${ENTREE}"
+fi
+exec ollama run "$MODELE" "$QUESTION"

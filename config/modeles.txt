@@ -1,0 +1,11 @@
+# nom_ollama|taille approx.|description
+# Modèles gratuits et open source adaptés au Galaxy S25 Ultra (12 Go de RAM).
+llama3.2:3b|2.0 Go|Meta Llama 3.2 — discussion générale, rapide (RECOMMANDÉ)
+gemma3:4b|3.3 Go|Google Gemma 3 — très bon en français, comprend les images
+qwen2.5:3b|1.9 Go|Alibaba Qwen 2.5 — polyvalent, multilingue
+phi4-mini|2.5 Go|Microsoft Phi-4 mini — raisonnement et maths
+qwen2.5-coder:3b|1.9 Go|Qwen Coder — aide à la programmation
+deepseek-r1:1.5b|1.1 Go|DeepSeek R1 — réfléchit avant de répondre
+llama3.2:1b|1.3 Go|Meta Llama 3.2 mini — ultra léger et rapide
+moondream|1.7 Go|Moondream — décrit des photos
+mistral:7b|4.1 Go|Mistral 7B (français) — plus puissant, plus lent
