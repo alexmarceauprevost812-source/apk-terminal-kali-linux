@@ -47,7 +47,7 @@ jobs:
           make_latest: true
           files: sortie-apk/*
           body: |
-            🪄 **Terminal Magique** — terminal Linux + IA gratuites pour Android.
+            🐧 **Terminal Magique** — un vrai terminal Linux avancé pour Android (IA gratuites en option).
 
             **Samsung Galaxy S25 Ultra** : téléchargez `terminal-magique-1.0.${{ github.run_number }}-arm64-v8a.apk`
             (l'APK `universal` fonctionne sur tous les téléphones).
