@@ -1,13 +1,16 @@
-# 🪄 Terminal Linux Magique — Android + IA gratuites
+# 🐧 Terminal Magique — un vrai terminal Linux avancé pour Android
 
-Un terminal Linux complet sur **Samsung Galaxy S25 Ultra** (et tout Android 7+ en ARM64),
-avec des **IA gratuites qui tournent directement sur le téléphone**, sans Internet
-une fois téléchargées, sans compte et sans abonnement.
+Une **APK** qui transforme le **Samsung Galaxy S25 Ultra** (et tout Android 7+ en ARM64)
+en vrai terminal Linux avancé, **sans root**. Des IA gratuites hors-ligne sont disponibles en option.
 
-- 🐧 **Linux** : Termux + Debian complet (via `proot-distro`, **sans root**)
-- 🤖 **IA locales gratuites** : Llama 3.2, Gemma 3, Qwen 2.5, Phi-4, DeepSeek R1, Mistral… (via Ollama)
+- 🐧 **Vrai Linux** : bash, gestionnaire de paquets `pkg`/`apt` (des milliers de logiciels),
+  et **Debian complet** via `proot-distro`
+- ⌨ **Terminal avancé** : barre de touches Ctrl / Alt / Échap / Tab / flèches, plusieurs sessions,
+  autocomplétion, recherche floue dans l'historique (fzf), tmux, serveur SSH
+- 🧰 **Outils installés** : neovim, vim, micro, nano, git, ssh, rsync, python, nodejs, clang,
+  make, cmake, ripgrep, fd, bat, eza, zoxide, btop, htop, jq, nmap, dnsutils…
 - 🎨 **Thème noir** : fond noir, texte vert lime, **ce que vous tapez en blanc**
-- ✨ **Commandes magiques** : `magie` (menu) et `ia "question"`
+- 🤖 **IA gratuites (option)** : Llama 3.2, Gemma 3, Qwen, Phi-4, DeepSeek R1, Mistral… via Ollama
 
 ---
 
@@ -17,13 +20,15 @@ une fois téléchargées, sans compte et sans abonnement.
    <https://github.com/alexmarceauprevost812-source/apk-terminal-linux-/releases/latest>
 2. Téléchargez **`terminal-magique-…-arm64-v8a.apk`** (pour le S25 Ultra).
 3. Ouvrez le fichier et autorisez « Installer des applis inconnues » si Android le demande.
-4. Lancez **Terminal Magique** : le thème noir / vert lime et les commandes `magie` et `ia`
-   sont déjà dedans. L'appli propose ensuite d'installer Debian et le moteur d'IA,
-   puis de télécharger une IA gratuite.
+4. Lancez **Terminal Magique** : le thème, la barre de touches spéciales et les commandes
+   `magie` sont déjà dedans. L'appli propose ensuite d'installer les outils du terminal
+   avancé et Debian (~1 Go, Wi-Fi conseillé), puis, **en option**, le moteur d'IA.
 
 > ⚠️ L'APK est basée sur Termux (même nom de paquet `com.termux`) :
 > **désinstallez Termux s'il est déjà installé** avant d'installer Terminal Magique.
 > Play Protect peut afficher un avertissement (appli hors Play Store) : choisissez « Installer quand même ».
+> Les modules Termux:API / Termux:Widget de F-Droid ne sont pas compatibles avec cette APK
+> (signature différente).
 
 Si vous refusez l'installation au premier lancement, tapez plus tard `magie-installer`.
 
@@ -48,9 +53,9 @@ pkg install -y git && git clone https://github.com/alexmarceauprevost812-source/
 L'installateur met Termux à jour, installe les outils Linux (git, python, nodejs, clang,
 vim, htop, tmux…), donne accès aux fichiers du téléphone, installe **Ollama** et **Debian**,
 applique le thème et installe les commandes `magie` et `ia`.
-Pour ne pas installer Debian : `bash install.sh --no-debian`
+Options : `--no-debian` (sans Debian), `--sans-ia` (sans le moteur d'IA).
 
-## 3. Télécharger une IA gratuite
+## 3. (Option) Télécharger une IA gratuite
 
 ```bash
 magie installer-ia
@@ -69,15 +74,33 @@ modèle de <https://ollama.com/library>.
 > 💡 Le S25 Ultra (12 Go de RAM) fait tourner confortablement les modèles de 1 à 4 milliards
 > de paramètres, et jusqu'à 7-8 milliards plus lentement.
 
-## 4. Utilisation
+## 4. Le terminal avancé
+
+| Action | Comment |
+|--------|---------|
+| Touches spéciales | barre au-dessus du clavier : `ESC` `TAB` `CTRL` `ALT` flèches `HOME` `END` `PGUP` `PGDN` |
+| Ctrl + touche | **Volume bas** + touche (ex. Vol↓ + C = Ctrl+C) |
+| Plusieurs terminaux | glisser depuis le bord gauche → *New session*, ou `Ctrl+Alt+C` |
+| Écran coupé en deux | `tmux` puis `Ctrl+B` `%` |
+| Historique | `Ctrl+R` (recherche floue fzf) |
+| Aller dans un dossier | `z nom` (zoxide) |
+| Éditer un fichier | `nvim`, `micro` ou `nano` |
+| Installer un logiciel | `pkg install nom` (Termux) ou `apt install nom` (dans Debian) |
+| Accès depuis un PC | `magie ssh` puis `ssh -p 8022 …` depuis le PC |
+| Aide-mémoire | `magie raccourcis` |
+
+Réglages : `config/termux.properties` (copié dans `~/.termux/`) et `config/avance.bashrc`.
+
+## 5. Utilisation
 
 ```bash
 magie                         # menu interactif
+magie linux                   # entrer dans Debian (apt install …)
+magie ssh                     # serveur SSH pour se connecter depuis un PC
 ia                            # discussion avec l'IA (/bye pour quitter)
 ia "Explique-moi Linux"       # réponse rapide
 ia -m gemma3:4b "Bonjour"     # choisir une autre IA
 cat notes.txt | ia "résume"   # l'IA lit un fichier
-magie linux                   # entrer dans Debian (apt install …)
 magie serveur                 # API IA sur http://127.0.0.1:11434
 magie aide                    # toutes les commandes
 ```
@@ -111,6 +134,8 @@ install.sh              installateur
 bin/magie               menu magique
 bin/ia                  question rapide à l'IA
 bin/magie-installer     installation complète (depuis l'APK)
+config/termux.properties barre de touches, raccourcis, historique
+config/avance.bashrc    autocomplétion, fzf, zoxide, alias
 apk/construire.sh       construit l'APK Terminal Magique
 apk/premier-demarrage.sh accueil au premier lancement de l'APK
 apk/zz-magie.sh         déclenche l'accueil (etc/profile.d)

@@ -14,6 +14,10 @@ violet='\033[1;35m'; cyan='\033[1;36m'; vert='\033[1;32m'; jaune='\033[1;33m'; f
 modele_actif() { cat "$ACTIF" 2>/dev/null || echo "llama3.2:3b"; }
 
 serveur_ia() {
+  if ! command -v ollama >/dev/null 2>&1; then
+    echo -e "${jaune}➜ Installation du moteur d'IA (Ollama)…${fin}"
+    pkg install -y ollama || { echo "✖ Impossible d'installer Ollama"; return 1; }
+  fi
   if ! curl -s --max-time 2 http://127.0.0.1:11434/api/version >/dev/null 2>&1; then
     echo -e "${jaune}➜ Démarrage du moteur d'IA…${fin}"
     nohup ollama serve >"$DOSSIER/ollama.log" 2>&1 &
@@ -115,6 +119,44 @@ infos() {
   fi
 }
 
+raccourcis() {
+  echo -e "${cyan}⌨  Raccourcis du terminal avancé${fin}"
+  cat <<'TXT'
+
+  Barre de touches      ESC | / - HOME ↑ END PGUP DEL
+                        TAB CTRL ALT ~ ← ↓ → PGDN ⌨
+  Glisser la barre →    champ de saisie texte (accents, emojis)
+  Volume bas + touche   Ctrl + touche  (Vol↓ + C = Ctrl+C)
+  Volume haut + touche  touches spéciales (Vol↑ + W = ↑, Vol↑ + E = Échap)
+
+  Ctrl+R                recherche floue dans l'historique (fzf)
+  Ctrl+T                chercher un fichier (fzf)
+  Tab                   autocomplétion (commandes, fichiers, git, pkg…)
+  z dossier             aller dans un dossier déjà visité (zoxide)
+  Ctrl+Alt+C            nouvelle session ; Ctrl+Alt+← / → changer de session
+  Bord gauche → glisser liste des sessions
+  Appui long            copier / coller
+
+  tmux                  Ctrl+B puis C (fenêtre), % ou " (couper l'écran), D (détacher)
+  ll / arbre / voir     lister, arborescence, afficher un fichier en couleur
+TXT
+}
+
+serveur_ssh() {
+  command -v sshd >/dev/null 2>&1 || pkg install -y openssh || return 1
+  if ! pgrep -x sshd >/dev/null 2>&1; then
+    echo -e "${jaune}➜ Choisissez un mot de passe pour la connexion SSH :${fin}"
+    passwd
+    sshd && echo -e "${vert}✔ Serveur SSH lancé${fin}"
+  else
+    echo -e "${vert}✔ Serveur SSH déjà lancé${fin}"
+  fi
+  local ip
+  ip="$(ifconfig 2>/dev/null | awk '/inet /{print $2}' | grep -v '^127\.' | head -n1)"
+  echo "  Depuis un PC du même Wi-Fi :  ssh -p 8022 $(whoami)@${ip:-<IP-du-téléphone>}"
+  echo "  Pour arrêter :  pkill sshd"
+}
+
 mise_a_jour() {
   yes | pkg upgrade -y
   command -v proot-distro >/dev/null 2>&1 && proot-distro login debian -- bash -c "apt update && apt upgrade -y" || true
@@ -123,9 +165,17 @@ mise_a_jour() {
 
 aide() {
   cat <<EOF
-🪄 magie — Terminal Linux Magique
+🐧 magie — Terminal Linux avancé
 
   magie                  menu interactif
+  magie linux            entrer dans Debian (Linux complet, apt)
+  magie raccourcis       touches spéciales et raccourcis
+  magie ssh              se connecter au téléphone depuis un PC
+  magie infos            infos du téléphone
+  magie maj              tout mettre à jour
+  magie-installer        (ré)installer les outils du terminal avancé
+
+  IA gratuites (option) :
   magie chat             discuter avec l'IA active
   magie installer-ia     installer un pack d'IA gratuites
   magie modeles          voir / télécharger des IA
@@ -133,9 +183,6 @@ aide() {
   magie supprimer        supprimer une IA (libérer de la place)
   magie serveur          lancer l'API IA pour d'autres applis
   magie stop             arrêter le moteur d'IA
-  magie linux            entrer dans Debian (Linux complet)
-  magie infos            infos du téléphone
-  magie maj              tout mettre à jour
   ia "question"          réponse rapide de l'IA
 EOF
 }
@@ -146,32 +193,33 @@ menu() {
     echo -e "${violet}"
     cat <<'EOF'
    ╔══════════════════════════════════════════╗
-   ║    🪄  TERMINAL LINUX MAGIQUE  🪄          ║
+   ║    🐧  TERMINAL LINUX AVANCÉ  🪄           ║
    ╚══════════════════════════════════════════╝
 EOF
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
-    echo "   1) 🤖 Discuter avec l'IA"
-    echo "   2) 📦 Installer un pack d'IA gratuites"
-    echo "   3) 📚 Voir / télécharger des IA"
-    echo "   4) ⭐ Changer d'IA active"
-    echo "   5) 🗑  Supprimer une IA"
-    echo "   6) 🌐 Lancer l'API IA (pour d'autres applis)"
-    echo "   7) 🐧 Entrer dans Linux Debian"
-    echo "   8) 📱 Infos du téléphone"
-    echo "   9) 🔄 Tout mettre à jour"
+    echo "   1) 🐧 Entrer dans Linux Debian"
+    echo "   2) ⌨  Raccourcis et touches spéciales"
+    echo "   3) 🔐 Serveur SSH (accès depuis un PC)"
+    echo "   4) 📱 Infos du téléphone"
+    echo "   5) 🔄 Tout mettre à jour"
+    echo "   6) 🤖 Discuter avec l'IA"
+    echo "   7) 📦 Installer un pack d'IA gratuites"
+    echo "   8) 📚 Voir / télécharger / changer d'IA"
+    echo "   9) 🗑  Supprimer une IA"
     echo "   0) 🚪 Quitter"
     echo
     read -rp "   Votre choix : " c
     case "$c" in
-      1) ia ;;
-      2) installer_ia ;;
-      3) liste_modeles; echo; read -rp "Télécharger un modèle ? (o/N) " r; [[ "$r" =~ ^[oOyY] ]] && telecharger ;;
-      4) activer ;;
-      5) supprimer ;;
-      6) serveur_web ;;
-      7) linux ;;
-      8) infos ;;
-      9) mise_a_jour ;;
+      1) linux ;;
+      2) raccourcis ;;
+      3) serveur_ssh ;;
+      4) infos ;;
+      5) mise_a_jour ;;
+      6) ia ;;
+      7) installer_ia ;;
+      8) serveur_ia && liste_modeles && { echo; read -rp "Télécharger (t), activer (a) ou rien (Entrée) ? " r
+         case "$r" in t|T) telecharger ;; a|A) activer ;; esac; } ;;
+      9) supprimer ;;
       0|q) exit 0 ;;
       *) echo "Choix inconnu" ;;
     esac
@@ -190,6 +238,8 @@ case "${1:-}" in
   serveur) serveur_web ;;
   stop) stop_ia ;;
   linux) linux ;;
+  raccourcis) raccourcis ;;
+  ssh) serveur_ssh ;;
   infos) infos ;;
   maj) mise_a_jour ;;
   aide|-h|--help) aide ;;
