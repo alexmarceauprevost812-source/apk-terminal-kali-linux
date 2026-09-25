@@ -1,0 +1,59 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# claude-code — installe et lance Claude Code, l'assistant IA officiel d'Anthropic.
+#   claude-code            → installe (au premier lancement) puis ouvre Claude Code
+#   claude-code installer  → (ré)installer / mettre à jour Claude Code
+#   claude-code -- ...     → passe des arguments à la vraie commande « claude »
+#
+# ⚠️ Différent de « ia » (IA locale gratuite, hors-ligne) : Claude Code a besoin
+#    d'Internet et d'un compte Anthropic/Claude (abonnement Pro/Max, ou clé API).
+set -uo pipefail
+
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
+
+deja_installe() { command -v claude >/dev/null 2>&1; }
+
+# Claude Code s'installe dans le terminal Android (Termux), pas dans Kali.
+if [ "${1:-}" != "aide" ] && [ "${1:-}" != "-h" ] && [ "${1:-}" != "--help" ] \
+   && grep -qi '^ID=kali' /etc/os-release 2>/dev/null; then
+  echo -e "${rouge}✖ Claude Code s'installe dans le terminal Android, pas dans Kali.${fin}"
+  echo -e "${jaune}➜ Tapez  ${blanc}exit${jaune}  pour revenir au terminal Android, puis relancez.${fin}"
+  exit 1
+fi
+
+installer() {
+  echo -e "${lime}➜ Vérification de Node.js…${fin}"
+  if ! command -v npm >/dev/null 2>&1; then
+    pkg install -y nodejs || { echo -e "${rouge}✖ Impossible d'installer Node.js.${fin}"; return 1; }
+  fi
+
+  echo -e "${lime}➜ Installation de Claude Code (npm, Wi-Fi conseillé)…${fin}"
+  if ! npm install -g @anthropic-ai/claude-code; then
+    echo -e "${rouge}✖ L'installation a échoué.${fin}"
+    echo -e "${jaune}➜ Réessayez :  claude-code installer${fin}"
+    echo -e "${jaune}➜ Si l'erreur parle de permissions npm, essayez :${fin}"
+    echo -e "   npm config set prefix \$PREFIX && claude-code installer"
+    return 1
+  fi
+
+  echo -e "${lime}✔ Claude Code est installé.${fin}"
+  echo -e "   Lancez-le avec :  ${blanc}claude-code${fin}  (ou directement : ${blanc}claude${fin})"
+  echo -e "   À la première ouverture, il vous demandera de vous connecter à votre"
+  echo -e "   compte Anthropic (Claude.ai) dans le navigateur, ou une clé API."
+}
+
+case "${1:-}" in
+  installer|update|maj)
+    installer ;;
+  --)
+    shift
+    deja_installe || installer || exit 1
+    exec claude "$@" ;;
+  "")
+    deja_installe || { installer || exit 1; }
+    exec claude ;;
+  -h|--help|aide)
+    sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *)
+    deja_installe || { installer || exit 1; }
+    exec claude "$@" ;;
+esac

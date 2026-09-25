@@ -217,6 +217,28 @@ Entrée, rien n'est exécuté.
 > 💡 Ça marche aussi pour apprendre à utiliser un outil déjà téléchargé :
 > `ia commande "comment scanner mon réseau avec nmap"` explique et propose la commande.
 
+## 🛠️ Claude Code (assistant officiel d'Anthropic)
+
+En plus de l'IA locale gratuite ci-dessus, vous pouvez installer **Claude Code**,
+l'outil officiel d'Anthropic en ligne de commande — plus puissant pour coder,
+lire et modifier des fichiers, gérer un projet.
+
+```bash
+claude-code            # l'installe (une fois) puis l'ouvre
+claude-code installer  # (ré)installer / mettre à jour
+```
+
+(aussi `magie claude` et l'option 16 du menu `magie`.) Une fois installé, la vraie
+commande s'appelle **`claude`**.
+
+> ⚠️ Différence avec « ia » : Claude Code a besoin d'**Internet** et d'un **compte
+> Anthropic / Claude** (abonnement Pro ou Max, ou une clé API) — ce n'est pas gratuit
+> ni hors-ligne comme l'IA locale. À la première ouverture, il demande de vous
+> connecter dans le navigateur.
+>
+> ℹ️ Installez-le depuis le **terminal Android** (pas depuis Kali) : tapez `exit`
+> si vous êtes dans Kali.
+
 ## 🖥️ Bureau graphique (comme un ordinateur)
 
 L'APK peut afficher un **vrai bureau Kali (XFCE)** — barre des tâches, menu, fenêtres —
@@ -284,7 +306,8 @@ bin/kali                terminal Kali Linux (installation, mise à jour, auto)
 bin/guide               guide : ce que fait chaque outil Kali
 bin/catalogue           catalogue des outils par catégorie (installe)
 bin/bureau              bureau graphique XFCE (via VNC)
-bin/ia                  question rapide à l'IA
+bin/ia                  question rapide à l'IA / « ia commande » (propose + exécute)
+bin/claude-code         installe et lance Claude Code (officiel Anthropic)
 bin/magie-installer     installation complète (depuis l'APK)
 bin/magie-update        met à jour l'app et vérifie la nouvelle APK
 config/termux.properties barre de touches, raccourcis, historique
