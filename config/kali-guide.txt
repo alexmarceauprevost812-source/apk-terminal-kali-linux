@@ -1,0 +1,77 @@
+# Guide des outils Kali — ce que fait chaque outil et un exemple simple.
+# Format d'une fiche :  @nom | catégorie | résumé court
+# puis des lignes de description, et des lignes d'exemple commençant par $
+# ⚠️ N'utilisez ces outils que sur VOS appareils/réseaux ou avec autorisation écrite.
+
+@nmap | Réseau | Scanner de réseau : trouve les machines et les ports ouverts
+nmap regarde quelles machines répondent sur un réseau et quels « ports »
+(portes d'entrée des services : web, ssh…) sont ouverts. C'est la première
+étape pour cartographier un réseau.
+$ nmap 192.168.1.0/24            # liste les machines du réseau local
+$ nmap -sV scanme.nmap.org       # détecte les services et leurs versions
+
+@sqlmap | Web | Teste les failles d'injection SQL d'un site web
+sqlmap essaie automatiquement de trouver et d'exploiter les failles
+« injection SQL » (quand un site laisse passer des commandes vers sa base
+de données). Sert à vérifier si VOTRE site est vulnérable.
+$ sqlmap -u "https://mon-site.fr/page?id=1" --batch
+
+@hydra | Mots de passe | Teste des mots de passe sur un service (SSH, FTP…)
+hydra essaie une liste de mots de passe contre un service pour repérer les
+comptes à mot de passe faible. À n'utiliser que sur vos propres comptes.
+$ hydra -l admin -P liste.txt ssh://192.168.1.10
+
+@nikto | Web | Cherche les faiblesses connues d'un serveur web
+nikto interroge un serveur web et signale les fichiers dangereux, les
+vieilles versions de logiciels et les mauvaises configurations.
+$ nikto -h https://mon-site.fr
+
+@whatweb | Web | Dit quelles technologies utilise un site web
+whatweb identifie le CMS (WordPress…), le serveur, les frameworks et les
+versions d'un site. Utile pour la reconnaissance.
+$ whatweb https://mon-site.fr
+
+@dirb | Web | Cherche les dossiers et pages cachés d'un site
+dirb teste des noms courants (/admin, /backup…) pour découvrir des pages
+non listées.
+$ dirb https://mon-site.fr
+
+@wfuzz | Web | Teste en masse des paramètres/chemins d'un site (fuzzing)
+wfuzz remplace un mot-clé par chaque ligne d'une liste pour découvrir des
+pages, paramètres ou identifiants.
+$ wfuzz -w liste.txt https://mon-site.fr/FUZZ
+
+@wpscan | Web | Analyse la sécurité d'un site WordPress
+wpscan détecte la version de WordPress, les thèmes/extensions et leurs
+failles connues.
+$ wpscan --url https://mon-blog.fr
+
+@john | Mots de passe | Casse des empreintes de mots de passe (hash)
+John the Ripper retrouve des mots de passe à partir de leurs empreintes,
+pour tester la solidité de VOS mots de passe.
+$ john --wordlist=liste.txt empreintes.txt
+
+@hashcat | Mots de passe | Casse des empreintes avec le processeur/GPU
+hashcat fait la même chose que john, en très rapide. Sur téléphone (sans
+GPU), il reste lent.
+$ hashcat -m 0 empreintes.txt liste.txt
+
+@metasploit-framework | Exploitation | Boîte à outils d'exploitation et de test
+Metasploit (commande « msfconsole ») rassemble des modules pour tester des
+failles connues, dans un cadre autorisé (audit, laboratoire).
+$ msfconsole                     # ouvre la console ; 'help' pour l'aide
+
+@tcpdump | Réseau | Capture et affiche le trafic réseau
+tcpdump montre les paquets qui circulent, pour analyser ou déboguer un
+réseau. (Limité sans root.)
+$ tcpdump -i any -c 20
+
+@netcat | Réseau | « Couteau suisse » des connexions réseau (commande nc)
+netcat ouvre des connexions réseau à la main : tester un port, transférer
+un fichier, ouvrir un mini-serveur.
+$ nc -vz 192.168.1.10 22         # teste si le port SSH est ouvert
+
+@whois | Réseau | Donne les infos publiques d'un domaine
+whois affiche le propriétaire déclaré, les dates et les serveurs DNS d'un
+nom de domaine.
+$ whois example.com

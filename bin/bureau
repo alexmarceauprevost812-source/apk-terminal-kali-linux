@@ -1,0 +1,88 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# bureau — un vrai bureau graphique Kali (XFCE) dans le téléphone, via VNC.
+#   bureau installer     → installe le bureau XFCE + le serveur d'affichage dans Kali
+#   bureau               → démarre le bureau et explique comment l'afficher
+#   bureau arreter       → arrête le bureau
+# Pour VOIR le bureau : installez une appli « VNC Viewer » sur Android
+# et connectez-vous à  localhost:1  (mot de passe défini à l'installation).
+set -uo pipefail
+
+NOM="kali"
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
+
+dans_kali() { proot-distro login "$NOM" -- "$@"; }
+
+verifier_kali() {
+  if ! command -v proot-distro >/dev/null 2>&1 || ! proot-distro login "$NOM" -- true >/dev/null 2>&1; then
+    echo -e "${rouge}✖ Installez d'abord Kali :  kali installer${fin}"; exit 1
+  fi
+}
+
+installer() {
+  verifier_kali
+  echo -e "${lime}🖥  Installation du bureau Kali (XFCE) — ~1 à 2 Go, Wi-Fi conseillé…${fin}"
+  dans_kali bash -c '
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update &&
+    apt-get install -y kali-desktop-xfce tigervnc-standalone-server dbus-x11 \
+      xfonts-base xfonts-100dpi xfonts-75dpi at-spi2-core kali-menu &&
+    apt-get clean
+  ' || { echo -e "${rouge}✖ Installation incomplète. Réessayez : bureau installer${fin}"; exit 1; }
+
+  echo -e "${lime}➜ Choisissez un mot de passe pour le bureau (6-8 caractères) :${fin}"
+  dans_kali bash -c '
+    mkdir -p ~/.vnc
+    vncpasswd
+    cat > ~/.vnc/xstartup <<XS
+#!/bin/sh
+unset SESSION_MANAGER DBUS_SESSION_BUS_ADDRESS
+export XDG_RUNTIME_DIR=/tmp/runtime-root
+[ -x /usr/bin/dbus-launch ] && eval "\$(dbus-launch --sh-syntax)"
+exec startxfce4
+XS
+    chmod +x ~/.vnc/xstartup
+  '
+  echo -e "${lime}✔ Bureau installé. Lancez-le avec :  bureau${fin}"
+  echo -e "   Installez une appli ${gras:-}VNC Viewer${fin} sur Android (Play Store, gratuit)."
+}
+
+demarrer() {
+  verifier_kali
+  if ! dans_kali bash -c 'command -v vncserver >/dev/null'; then
+    echo -e "${jaune}➜ Bureau pas encore installé.${fin}"; installer;
+  fi
+  echo -e "${lime}🖥  Démarrage du bureau Kali…${fin}"
+  dans_kali bash -c '
+    mkdir -p /tmp/runtime-root
+    vncserver -kill :1 >/dev/null 2>&1
+    rm -f /tmp/.X11-unix/X1 /tmp/.X1-lock 2>/dev/null
+    vncserver :1 -geometry 1280x720 -depth 24 -localhost no
+  ' || { echo -e "${rouge}✖ Le bureau n'a pas démarré.${fin}"; exit 1; }
+  cat <<EOF
+
+$(printf "${lime}")✔ Bureau prêt !$(printf "${fin}")
+
+  1) Installez une appli « VNC Viewer » sur Android (gratuit, Play Store).
+  2) Ouvrez-la et connectez-vous à :  ${blanc}localhost:1${fin}
+     (ou 127.0.0.1:5901)
+  3) Entrez le mot de passe choisi à l'installation.
+
+  Pour arrêter le bureau :  ${blanc}bureau arreter${fin}
+
+EOF
+}
+
+arreter() {
+  verifier_kali
+  dans_kali bash -c 'vncserver -kill :1' && echo -e "${lime}✔ Bureau arrêté${fin}" \
+    || echo "Le bureau n'était pas lancé."
+}
+
+case "${1:-}" in
+  installer) installer ;;
+  arreter|stop) arreter ;;
+  ""|demarrer|start) demarrer ;;
+  -h|--help|aide) sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) echo "Usage : bureau [installer|arreter]"; exit 1 ;;
+esac

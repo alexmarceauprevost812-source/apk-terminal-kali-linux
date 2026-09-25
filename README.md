@@ -146,6 +146,36 @@ Pour tout ajouter (l'ensemble d'outils standard), tapez `kali outils complet`
 > Utilisez les outils de sécurité uniquement sur vos propres appareils et réseaux,
 > ou avec une autorisation écrite.
 
+## 📖 Guide des outils
+
+Chaque outil est expliqué : à quoi il sert, en une phrase simple, avec un exemple.
+
+```bash
+guide            # la liste de tous les outils avec un résumé
+guide nmap       # fiche détaillée d'un outil + exemples
+guide web        # cherche « web » dans les noms, catégories et résumés
+```
+
+(aussi `kali guide` et l'option 3 du menu `magie`). La liste se modifie dans
+`config/kali-guide.txt`.
+
+## 🖥️ Bureau graphique (comme un ordinateur)
+
+L'APK peut afficher un **vrai bureau Kali (XFCE)** — barre des tâches, menu, fenêtres —
+sur le téléphone, via un affichage VNC.
+
+```bash
+bureau installer   # installe le bureau XFCE dans Kali (~1 à 2 Go, une seule fois)
+bureau             # démarre le bureau et indique comment l'afficher
+bureau arreter     # arrête le bureau
+```
+
+Pour **voir** le bureau : installez une appli **VNC Viewer** (gratuite, Play Store),
+ouvrez-la et connectez-vous à **`localhost:1`** (mot de passe choisi à l'installation).
+
+> 💡 Un écran de téléphone reste petit pour un bureau : c'est plus confortable en
+> connectant le téléphone à un écran (DeX sur le S25 Ultra) ou en affichant depuis un PC.
+
 ## 🎨 Thème
 
 | Élément                     | Couleur          |
@@ -177,12 +207,15 @@ et restent ensuite **100 % hors-ligne** sur le téléphone.
 install.sh              installateur
 bin/magie               menu magique
 bin/kali                terminal Kali Linux (installation, mise à jour, auto)
+bin/guide               guide : ce que fait chaque outil Kali
+bin/bureau              bureau graphique XFCE (via VNC)
 bin/ia                  question rapide à l'IA
 bin/magie-installer     installation complète (depuis l'APK)
 config/termux.properties barre de touches, raccourcis, historique
 config/avance.bashrc    autocomplétion, fzf, zoxide, alias
 config/kali-auto.bashrc ouvre Kali à chaque nouvelle session
 config/kali-outils.txt  outils Kali installés automatiquement
+config/kali-guide.txt   guide (rôle + exemples) de chaque outil
 apk/construire.sh       construit l'APK Terminal Magique
 apk/premier-demarrage.sh accueil au premier lancement de l'APK
 apk/zz-magie.sh         déclenche l'accueil (etc/profile.d)

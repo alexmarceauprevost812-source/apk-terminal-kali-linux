@@ -179,6 +179,8 @@ aide() {
   kali                   entrer dans Kali Linux (aussi : magie linux)
   kali auto on|off       ouvrir Kali à chaque nouvelle session (ou non)
   kali outils            installer les outils Kali (nmap, sqlmap, hydra…)
+  guide [outil]          ce que font les outils Kali (+ exemples)
+  bureau                 bureau graphique Kali (XFCE via VNC)
   magie raccourcis       touches spéciales et raccourcis
   magie ssh              se connecter au téléphone depuis un PC
   magie infos            infos du téléphone
@@ -209,29 +211,34 @@ EOF
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
     echo "   1) 🐉 Entrer dans Kali Linux"
     echo "   2) 🧰 Installer les outils Kali"
-    echo "   3) ⌨  Raccourcis et touches spéciales"
-    echo "   4) 🔐 Serveur SSH (accès depuis un PC)"
-    echo "   5) 📱 Infos du téléphone"
-    echo "   6) 🔄 Tout mettre à jour"
-    echo "   7) 🤖 Discuter avec l'IA"
-    echo "   8) 📦 Installer un pack d'IA gratuites"
-    echo "   9) 📚 Voir / télécharger / changer d'IA"
-    echo "  10) 🗑  Supprimer une IA"
+    echo "   3) 📖 Guide des outils (ce qu'ils font)"
+    echo "   4) 🖥  Bureau graphique Kali (VNC)"
+    echo "   5) ⌨  Raccourcis et touches spéciales"
+    echo "   6) 🔐 Serveur SSH (accès depuis un PC)"
+    echo "   7) 📱 Infos du téléphone"
+    echo "   8) 🔄 Tout mettre à jour"
+    echo "   9) 🤖 Discuter avec l'IA"
+    echo "  10) 📦 Installer un pack d'IA gratuites"
+    echo "  11) 📚 Voir / télécharger / changer d'IA"
+    echo "  12) 🗑  Supprimer une IA"
     echo "   0) 🚪 Quitter"
     echo
     read -rp "   Votre choix : " c
     case "$c" in
       1) linux ;;
       2) outils_kali ;;
-      3) raccourcis ;;
-      4) serveur_ssh ;;
-      5) infos ;;
-      6) mise_a_jour ;;
-      7) ia ;;
-      8) installer_ia ;;
-      9) serveur_ia && liste_modeles && { echo; read -rp "Télécharger (t), activer (a) ou rien (Entrée) ? " r
+      3) guide; echo; read -rp "   Nom d'un outil pour le détail (Entrée pour passer) : " g
+         [ -n "$g" ] && guide "$g" ;;
+      4) bureau ;;
+      5) raccourcis ;;
+      6) serveur_ssh ;;
+      7) infos ;;
+      8) mise_a_jour ;;
+      9) ia ;;
+      10) installer_ia ;;
+      11) serveur_ia && liste_modeles && { echo; read -rp "Télécharger (t), activer (a) ou rien (Entrée) ? " r
          case "$r" in t|T) telecharger ;; a|A) activer ;; esac; } ;;
-      10) supprimer ;;
+      12) supprimer ;;
       0|q) exit 0 ;;
       *) echo "Choix inconnu" ;;
     esac
@@ -251,6 +258,8 @@ case "${1:-}" in
   stop) stop_ia ;;
   linux|kali) linux ;;
   outils) outils_kali ;;
+  guide) shift; exec guide "$@" ;;
+  bureau) shift; exec bureau "$@" ;;
   raccourcis) raccourcis ;;
   ssh) serveur_ssh ;;
   infos) infos ;;

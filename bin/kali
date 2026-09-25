@@ -5,6 +5,8 @@
 #   kali maj             → mettre Kali à jour (apt full-upgrade)
 #   kali outils          → (ré)installer les outils Kali de base
 #   kali outils complet  → installer TOUS les outils (kali-linux-headless)
+#   kali guide [outil]   → guide : ce que fait chaque outil (+ exemples)
+#   kali bureau          → bureau graphique XFCE (via VNC)
 #   kali auto on|off     → ouvrir Kali automatiquement à chaque nouvelle session
 #   kali -- commande     → lancer une commande dans Kali
 set -uo pipefail
@@ -96,6 +98,8 @@ case "${1:-}" in
     kali_installe || installer || exit 1
     proot-distro login "$NOM" -- bash -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y' ;;
   outils) installer_outils "${2:-}" ;;
+  guide) shift; exec guide "$@" ;;
+  bureau) shift; exec bureau "$@" ;;
   auto)
     mkdir -p "$DOSSIER"
     case "${2:-}" in
@@ -111,6 +115,6 @@ case "${1:-}" in
     kali_installe || installer || exit 1
     exec proot-distro login --shared-tmp "$NOM" ;;
   -h|--help|aide)
-    sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//' ;;
+    sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) echo "Commande inconnue : $1 (voir « kali aide »)"; exit 1 ;;
 esac
