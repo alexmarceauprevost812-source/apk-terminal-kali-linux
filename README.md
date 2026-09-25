@@ -55,7 +55,7 @@ et publie les APK dans **Releases** (on peut aussi le lancer à la main depuis l
 
 L'application **suit les mises à jour** toute seule :
 
-- à l'ouverture (au plus une fois par jour), elle vérifie sur GitHub s'il existe une
+- à chaque ouverture, elle vérifie sur GitHub s'il existe une
   **nouvelle APK** et affiche le lien de téléchargement si c'est le cas ;
 - `magie-update` met à jour les **commandes** (`magie`, `kali`, `guide`, `bureau`, `ia`…)
   et les fichiers de configuration directement depuis GitHub, sans réinstaller l'APK ;
