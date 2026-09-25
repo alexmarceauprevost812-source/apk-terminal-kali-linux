@@ -162,8 +162,25 @@ Dès la première installation, **une sélection d'outils est installée automat
 Pour tout ajouter (l'ensemble d'outils standard), tapez `kali outils complet`
 (métapaquet `kali-linux-headless`).
 
-> ℹ️ Sans root, Kali tourne dans `proot` : certaines fonctions qui exigent le noyau ou la
-> carte Wi-Fi (mode moniteur, scans réseau bruts) ne sont pas disponibles.
+> ℹ️ **Pourquoi ce projet n'est pas « NetHunter Full »** — Ce Kali tourne dans `proot`,
+> exactement comme l'édition officielle **NetHunter Rootless** de Kali : aucune
+> modification du téléphone, pas de root, pas de bootloader touché. C'est un choix
+> voulu, pas une limite technique de ce projet. Sur un Galaxy récent (dont le S25
+> Ultra), l'édition « Full » de NetHunter — qui ajoute l'injection Wi-Fi, le mode
+> moniteur et les attaques HID/clavier — exige un **noyau NetHunter propre à
+> l'appareil** et un **bootloader déverrouillé**. Aucun des deux n'existe pour les
+> Galaxy S21 à S25 : Samsung ne propose pas de déverrouillage OEM sur les modèles
+> nord-américains, et le registre officiel de Kali ne liste aucun noyau NetHunter
+> pour ces modèles. Déverrouiller grillerait aussi le fusible Knox de façon
+> irréversible (Dossier sécurisé, Samsung Wallet/Pay, garantie).
+>
+> **Concrètement**, ça veut dire : le terminal, les outils réseau et web (nmap,
+> sqlmap, nikto, metasploit…) fonctionnent normalement, mais le mode moniteur Wi-Fi,
+> l'injection de paquets et les attaques par clavier USB (HID) ne sont pas
+> disponibles. Pour ça, il faut du matériel dédié : un Raspberry Pi ou un PC sous
+> Kali avec une clé Wi-Fi compatible, ou un téléphone secondaire officiellement
+> supporté par NetHunter (ex. OnePlus 6/6T, Pixel 6a).
+>
 > Utilisez les outils de sécurité uniquement sur vos propres appareils et réseaux,
 > ou avec une autorisation écrite.
 
