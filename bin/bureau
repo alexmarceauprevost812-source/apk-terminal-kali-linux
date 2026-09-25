@@ -64,9 +64,13 @@ installer() {
 
   echo -e "${lime}➜ Choisissez un mot de passe pour le bureau (6-8 caractères) :${fin}"
   dans_kali bash -c '
-    mkdir -p ~/.vnc
+    mkdir -p ~/.vnc ~/.config/tigervnc
     vncpasswd
-    cat > ~/.vnc/xstartup <<XS
+    # Écrit le mot de passe dans les deux emplacements (ancien et nouveau tigervnc)
+    [ -f ~/.vnc/passwd ] && cp -f ~/.vnc/passwd ~/.config/tigervnc/passwd
+    [ -f ~/.config/tigervnc/passwd ] && cp -f ~/.config/tigervnc/passwd ~/.vnc/passwd
+    for dossier in ~/.vnc ~/.config/tigervnc; do
+      cat > "$dossier/xstartup" <<XS
 #!/bin/sh
 unset SESSION_MANAGER DBUS_SESSION_BUS_ADDRESS
 export XDG_RUNTIME_DIR=/tmp/runtime-root
@@ -81,7 +85,8 @@ export XDG_RUNTIME_DIR=/tmp/runtime-root
   fi ) &
 exec startxfce4
 XS
-    chmod +x ~/.vnc/xstartup
+      chmod +x "$dossier/xstartup"
+    done
   '
   # Fond d'écran par défaut (thème noir / vert lime)
   local defaut; defaut="$(fichier_fond_defaut || true)"
@@ -151,11 +156,34 @@ fond() {
   appliquer_fond "$source" && echo -e "${lime}✔ Fond appliqué. (Si le bureau tourne, il se met à jour ; sinon au prochain démarrage.)${fin}"
 }
 
+# Corrige l'erreur « Could not migrate /root/.vnc to /root/.config/tigervnc »
+# en normalisant la config VNC (mot de passe + xstartup présents aux deux endroits,
+# et pas de migration bloquante).
+reparer_vnc() {
+  dans_kali bash -c '
+    mkdir -p ~/.config/tigervnc
+    # Récupère un mot de passe existant, où qu'"'"'il soit
+    if [ ! -f ~/.config/tigervnc/passwd ] && [ -f ~/.vnc/passwd ]; then
+      cp -f ~/.vnc/passwd ~/.config/tigervnc/passwd
+    fi
+    if [ ! -f ~/.vnc/passwd ] && [ -f ~/.config/tigervnc/passwd ]; then
+      mkdir -p ~/.vnc; cp -f ~/.config/tigervnc/passwd ~/.vnc/passwd
+    fi
+    # Récupère un xstartup existant
+    if [ ! -f ~/.config/tigervnc/xstartup ] && [ -f ~/.vnc/xstartup ]; then
+      cp -f ~/.vnc/xstartup ~/.config/tigervnc/xstartup
+    fi
+    chmod +x ~/.config/tigervnc/xstartup ~/.vnc/xstartup 2>/dev/null
+    chmod 600 ~/.config/tigervnc/passwd ~/.vnc/passwd 2>/dev/null
+  ' 2>/dev/null || true
+}
+
 demarrer() {
   verifier_kali
   if ! dans_kali bash -c 'command -v vncserver >/dev/null'; then
     echo -e "${jaune}➜ Bureau pas encore installé.${fin}"; installer;
   fi
+  reparer_vnc
   echo -e "${lime}🖥  Démarrage du bureau Kali…${fin}"
   dans_kali bash -c '
     mkdir -p /tmp/runtime-root
@@ -179,7 +207,8 @@ EOF
 
 arreter() {
   verifier_kali
-  dans_kali bash -c 'vncserver -kill :1' && echo -e "${lime}✔ Bureau arrêté${fin}" \
+  reparer_vnc
+  dans_kali bash -c 'vncserver -kill :1 2>/dev/null' && echo -e "${lime}✔ Bureau arrêté${fin}" \
     || echo "Le bureau n'était pas lancé."
 }
 
