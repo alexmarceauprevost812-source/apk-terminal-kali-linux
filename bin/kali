@@ -18,9 +18,22 @@ IMAGE="kalilinux/kali-rolling"   # image officielle Kali Linux (Docker Hub)
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 MAGIE="$PREFIX/share/magie"
 DOSSIER="$HOME/.magie"
-lime='\033[1;38;2;50;255;0m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
+lime='\033[1;38;2;50;255;0m'; jaune='\033[1;33m'; rouge='\033[1;31m'; blanc='\033[0;97m'; fin='\033[0m'
+
+# Sommes-nous déjà DANS une session proot / dans Kali ? (on ne peut pas y lancer proot-distro)
+en_proot() {
+  grep -qi '^ID=kali' /etc/os-release 2>/dev/null && return 0
+  [ -n "${PROOT_TMP_DIR:-}${PROOT_L2S_DIR:-}${PROOT_NO_SECCOMP:-}" ] && return 0
+  return 1
+}
+avertir_proot() {
+  echo -e "${rouge}✖ Vous êtes déjà à l'intérieur de Kali (ou d'une session Linux).${fin}"
+  echo -e "${jaune}➜ Tapez d'abord  ${blanc}exit${jaune}  pour revenir au terminal Android,${fin}"
+  echo -e "${jaune}  puis relancez.  Si l'erreur persiste, fermez complètement l'appli et rouvrez-la.${fin}"
+}
 
 kali_installe() {
+  en_proot && return 1
   command -v proot-distro >/dev/null 2>&1 && proot-distro login "$NOM" -- true >/dev/null 2>&1
 }
 
@@ -70,6 +83,7 @@ installer_outils() {
 }
 
 installer() {
+  if en_proot; then avertir_proot; return 1; fi
   echo -e "${lime}🐉 Installation de Kali Linux (image officielle $IMAGE)${fin}"
   echo -e "${jaune}   Wi-Fi conseillé : ~150 Mo à télécharger, puis la mise à jour de Kali.${fin}"
 
@@ -85,7 +99,11 @@ installer() {
 
   if ! kali_installe; then
     echo -e "${lime}➜ Téléchargement de Kali (l'erreur éventuelle s'affiche en dessous)…${fin}"
-    if ! proot-distro install --name "$NOM" "$IMAGE"; then
+    local sortie
+    if ! sortie="$(proot-distro install --name "$NOM" "$IMAGE" 2>&1 | tee /dev/tty; exit "${PIPESTATUS[0]}")"; then
+      if printf '%s' "$sortie" | grep -qi "proot session"; then
+        echo; avertir_proot; return 1
+      fi
       echo
       echo -e "${rouge}✖ Le téléchargement de Kali a échoué.${fin}"
       echo -e "${jaune}Diagnostic :${fin}"
@@ -145,9 +163,14 @@ case "${1:-}" in
     esac ;;
   --)
     shift
+    if en_proot; then exec bash -c "$*"; fi
     kali_installe || installer || exit 1
     exec proot-distro login --shared-tmp "$NOM" -- "$@" ;;
   "")
+    if en_proot; then
+      echo -e "${lime}🐉 Vous êtes déjà dans Kali Linux.${fin} (tapez ${blanc}exit${fin} pour revenir au terminal Android)"
+      exit 0
+    fi
     kali_installe || installer || exit 1
     exec proot-distro login --shared-tmp "$NOM" ;;
   -h|--help|aide)
