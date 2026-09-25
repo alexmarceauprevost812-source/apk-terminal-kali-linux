@@ -202,5 +202,5 @@ case "${1:-}" in
     exec proot-distro login --shared-tmp "$NOM" ;;
   -h|--help|aide)
     sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//' ;;
-  *) echo "Commande inconnue : $1 (voir « kali aide »)"; exit 1 ;;
+  *) echo -e "${rouge}✖ Commande inconnue : $1${fin} (voir « kali aide »)"; exit 1 ;;
 esac

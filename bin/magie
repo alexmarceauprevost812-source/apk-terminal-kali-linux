@@ -10,6 +10,7 @@ ACTIF="$DOSSIER/modele_actif"
 mkdir -p "$DOSSIER"
 
 violet='\033[1;35m'; cyan='\033[1;36m'; vert='\033[1;32m'; jaune='\033[1;33m'; fin='\033[0m'
+rouge='\033[1;31m'; orange='\033[1;38;2;255;140;0m'; blanc='\033[0;97m'
 
 modele_actif() { cat "$ACTIF" 2>/dev/null || echo "llama3.2:3b"; }
 
@@ -230,12 +231,9 @@ EOF
 menu() {
   while true; do
     clear
-    echo -e "${violet}"
-    cat <<'EOF'
-   ╔══════════════════════════════════════════╗
-   ║    🐉  TERMINAL KALI LINUX  🪄             ║
-   ╚══════════════════════════════════════════╝
-EOF
+    echo -e "${rouge}   ╔══════════════════════════════════════════╗${fin}"
+    echo -e "${rouge}   ║${blanc}    🐉  ${orange}TERMINAL KALI LINUX${blanc}  🪄             ${rouge}║${fin}"
+    echo -e "${rouge}   ╚══════════════════════════════════════════╝${fin}"
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
     echo "   1) 🐉 Entrer dans Kali Linux"
     echo "   2) 📚 Catalogue des outils (par catégorie)"
@@ -276,7 +274,7 @@ EOF
       15) supprimer ;;
       16) claude-code ;;
       0|q) exit 0 ;;
-      *) echo "Choix inconnu" ;;
+      *) echo -e "${rouge}✖ Choix inconnu${fin}" ;;
     esac
     echo; read -rp "   Entrée pour revenir au menu…" _
   done
@@ -305,5 +303,5 @@ case "${1:-}" in
   infos) infos ;;
   maj) mise_a_jour ;;
   aide|-h|--help) aide ;;
-  *) echo "Commande inconnue : $1"; aide; exit 1 ;;
+  *) echo -e "${rouge}✖ Commande inconnue : $1${fin}"; aide; exit 1 ;;
 esac
