@@ -239,6 +239,23 @@ commande s'appelle **`claude`**.
 > ℹ️ Installez-le depuis le **terminal Android** (pas depuis Kali) : tapez `exit`
 > si vous êtes dans Kali.
 
+## 🇫🇷 Toujours en français
+
+Tout le terminal parle français, y compris les IA :
+
+- **Claude Code** (`claude-code`) : répond et écrit toujours en français (Québec), même
+  question posée dans une autre langue. La règle est ajoutée automatiquement dans
+  `~/.claude/CLAUDE.md` et rappelée à chaque lancement (`--append-system-prompt`).
+- **Kali Linux** : la commande `kali francais` installe la locale `fr_FR.UTF-8` et
+  l'active à chaque ouverture de session dans Kali. Elle est appliquée automatiquement
+  à l'installation de Kali, et rappelée à chaque `kali maj`.
+- **L'IA locale** (`ia`) : une copie du modèle actif est créée une seule fois avec la
+  consigne « réponds toujours en français » intégrée (`ollama create`), puis réutilisée
+  — aucun re-téléchargement, juste une configuration locale.
+
+Pour l'activer sur un téléphone déjà installé : `magie-update`, puis `kali francais`
+(seulement si Kali est installé — sinon rien à faire de plus, c'est automatique).
+
 ## 🖥️ Bureau graphique (comme un ordinateur)
 
 L'APK peut afficher un **vrai bureau Kali (XFCE)** — barre des tâches, menu, fenêtres —

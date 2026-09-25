@@ -118,8 +118,22 @@ if [ "${1:-}" = "commande" ] || [ "${1:-}" = "cmd" ]; then
   exit $?
 fi
 
+# L'IA répond toujours en français : on crée (une seule fois) une copie du modèle
+# avec la consigne « toujours en français » intégrée. Si ça échoue, on garde le modèle normal.
+modele_francais() {
+  local fr="magie-fr-${MODELE//:/-}"
+  if ! ollama list 2>/dev/null | awk 'NR>1{print $1}' | grep -qE "^${fr}(:latest)?\$"; then
+    local mf; mf="$(mktemp)"
+    printf 'FROM %s\nSYSTEM """Tu réponds toujours en français (Québec), simplement et clairement, même si la question est posée dans une autre langue, sauf si on te demande explicitement une autre langue."""\n' "$MODELE" > "$mf"
+    ollama create "$fr" -f "$mf" >/dev/null 2>&1 || fr="$MODELE"
+    rm -f "$mf"
+  fi
+  MODELE="$fr"
+}
+
 demarrer_serveur
 verifier_modele
+modele_francais
 
 if [ $# -eq 0 ] && [ -t 0 ]; then
   echo -e "\033[1;35m🤖 Discussion avec $MODELE — tapez /bye pour quitter\033[0m"

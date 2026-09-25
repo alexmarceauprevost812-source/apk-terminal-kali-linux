@@ -3,6 +3,7 @@
 #   kali                 → entrer dans Kali Linux (l'installe au premier lancement)
 #   kali installer       → (ré)installer Kali Linux
 #   kali maj             → mettre Kali à jour (apt full-upgrade)
+#   kali francais        → passer Kali en français (locale fr_FR.UTF-8)
 #   kali diagnostic      → vérifie proot-distro, Internet, espace disque
 #   kali outils          → (ré)installer les outils Kali de base
 #   kali outils complet  → installer TOUS les outils (kali-linux-headless)
@@ -129,6 +130,7 @@ installer() {
   ' || echo -e "${jaune}➜ Configuration partielle : relancez « kali maj » plus tard.${fin}"
 
   installer_outils
+  francais_kali
 
   # Thème : fond noir, texte blanc, nom d'utilisateur vert lime
   mkdir -p "$PREFIX/tmp"
@@ -144,11 +146,36 @@ installer() {
   echo "   (pour revenir au terminal Android : « exit » ; désactiver : « kali auto off »)"
 }
 
+# Kali en français : installe la locale fr_FR.UTF-8 et l'active dans chaque session.
+francais_kali() {
+  echo -e "${lime}➜ Kali en français…${fin}"
+  proot-distro login "$NOM" -- bash -c '
+    export DEBIAN_FRONTEND=noninteractive
+    if ! locale -a 2>/dev/null | grep -qiE "^fr_FR\.utf-?8$"; then
+      apt-get update >/dev/null 2>&1
+      apt-get install -y --no-install-recommends locales >/dev/null 2>&1
+      sed -i "s/^# *fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/" /etc/locale.gen
+      grep -q "^fr_FR.UTF-8 UTF-8" /etc/locale.gen || echo "fr_FR.UTF-8 UTF-8" >> /etc/locale.gen
+      locale-gen >/dev/null 2>&1
+    fi
+    grep -q "magie-francais" /root/.bashrc 2>/dev/null || cat >> /root/.bashrc <<"EOF2"
+
+# magie-francais : tout en français
+export LANGUAGE=fr_FR:fr
+if locale -a 2>/dev/null | grep -qiE "^fr_FR\.utf-?8$"; then
+  export LANG=fr_FR.UTF-8 LC_ALL=fr_FR.UTF-8
+fi
+EOF2
+  ' || echo -e "${jaune}➜ Français partiel : relancez « kali francais » plus tard.${fin}"
+}
+
 case "${1:-}" in
   installer) installer ;;
+  francais|français) kali_installe || installer || exit 1; francais_kali ;;
   maj)
     kali_installe || installer || exit 1
-    proot-distro login "$NOM" -- bash -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y' ;;
+    proot-distro login "$NOM" -- bash -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y'
+    francais_kali ;;
   outils) installer_outils "${2:-}" ;;
   diagnostic|diag) diagnostic ;;
   guide) shift; exec guide "$@" ;;
@@ -174,6 +201,6 @@ case "${1:-}" in
     kali_installe || installer || exit 1
     exec proot-distro login --shared-tmp "$NOM" ;;
   -h|--help|aide)
-    sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
+    sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) echo "Commande inconnue : $1 (voir « kali aide »)"; exit 1 ;;
 esac

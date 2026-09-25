@@ -20,6 +20,16 @@ if [ "${1:-}" != "aide" ] && [ "${1:-}" != "-h" ] && [ "${1:-}" != "--help" ] \
   exit 1
 fi
 
+# Claude Code répond et écrit toujours en français (langue du projet).
+REGLE_FR="Réponds et écris toujours en français (Québec), y compris les explications, commentaires de code et messages de commit, sauf si l'utilisateur demande explicitement une autre langue."
+regler_francais() {
+  local dossier="$HOME/.claude" fichier="$HOME/.claude/CLAUDE.md"
+  mkdir -p "$dossier"
+  if ! grep -q 'Terminal Magique : français' "$fichier" 2>/dev/null; then
+    printf '\n<!-- Terminal Magique : français -->\n%s\n' "$REGLE_FR" >> "$fichier"
+  fi
+}
+
 installer() {
   echo -e "${lime}➜ Vérification de Node.js…${fin}"
   if ! command -v npm >/dev/null 2>&1; then
@@ -47,13 +57,13 @@ case "${1:-}" in
   --)
     shift
     deja_installe || installer || exit 1
-    exec claude "$@" ;;
+    regler_francais; exec claude --append-system-prompt "$REGLE_FR" "$@" ;;
   "")
     deja_installe || { installer || exit 1; }
-    exec claude ;;
+    regler_francais; exec claude --append-system-prompt "$REGLE_FR" ;;
   -h|--help|aide)
     sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
   *)
     deja_installe || { installer || exit 1; }
-    exec claude "$@" ;;
+    regler_francais; exec claude --append-system-prompt "$REGLE_FR" "$@" ;;
 esac
