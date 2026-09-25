@@ -106,6 +106,27 @@ linux() {
   kali
 }
 
+sessions_menu() {
+  echo -e "${cyan}🗂  Sessions du terminal${fin}"
+  echo
+  echo -e "${jaune}Dans l'appli :${fin} glissez depuis le bord GAUCHE de l'écran pour voir vos"
+  echo "  sessions et en ouvrir une nouvelle (bouton + / NEW SESSION)."
+  echo
+  echo -e "${jaune}Pour FERMER (supprimer 🗑) la session où vous êtes :${fin}"
+  echo -e "   tapez  ${vert}fermer${fin}  (ou ${vert}exit${fin})"
+  echo
+  if command -v tmux >/dev/null 2>&1; then
+    echo -e "${jaune}Sessions tmux (plusieurs terminaux dans un) :${fin}"
+    tmux ls 2>/dev/null | sed 's/^/   /' || echo "   (aucune)"
+    echo -e "   Nouvelle :  ${vert}tmux new -s travail${fin}"
+    echo -e "   Supprimer une :  ${vert}tmux kill-session -t NOM${fin}"
+    echo -e "   Supprimer toutes :  ${vert}tmux kill-server${fin}"
+    echo
+    read -rp "   Nom d'une session tmux à supprimer (Entrée pour passer) : " s
+    [ -n "$s" ] && tmux kill-session -t "$s" 2>/dev/null && echo -e "${vert}🗑 Session '$s' supprimée${fin}" || true
+  fi
+}
+
 outils_kali() {
   echo -e "${cyan}🧰 Outils Kali${fin}"
   echo "   1) De base : nmap, sqlmap, hydra, nikto, john, metasploit… (recommandé)"
@@ -184,6 +205,8 @@ aide() {
   catalogue              parcourir/installer les outils par catégorie
   bureau                 bureau graphique Kali (XFCE via VNC)
   magie raccourcis       touches spéciales et raccourcis
+  magie sessions         ouvrir / fermer (supprimer 🗑) des sessions
+  fermer                 fermer la session actuelle (= poubelle 🗑)
   magie ssh              se connecter au téléphone depuis un PC
   magie infos            infos du téléphone
   magie maj              tout mettre à jour (app + Kali + paquets)
@@ -219,12 +242,13 @@ EOF
     echo "   5) 🖥  Bureau graphique Kali (VNC)"
     echo "   6) ⌨  Raccourcis et touches spéciales"
     echo "   7) 🔐 Serveur SSH (accès depuis un PC)"
-    echo "   8) 📱 Infos du téléphone"
-    echo "   9) 🔄 Tout mettre à jour"
-    echo "  10) 🤖 Discuter avec l'IA"
-    echo "  11) 📦 Installer un pack d'IA gratuites"
-    echo "  12) 📚 Voir / télécharger / changer d'IA"
-    echo "  13) 🗑  Supprimer une IA"
+    echo "   8) 🗂  Sessions (ouvrir / fermer 🗑)"
+    echo "   9) 📱 Infos du téléphone"
+    echo "  10) 🔄 Tout mettre à jour"
+    echo "  11) 🤖 Discuter avec l'IA"
+    echo "  12) 📦 Installer un pack d'IA gratuites"
+    echo "  13) 📚 Voir / télécharger / changer d'IA"
+    echo "  14) 🗑  Supprimer une IA"
     echo "   0) 🚪 Quitter"
     echo
     read -rp "   Votre choix : " c
@@ -237,13 +261,14 @@ EOF
       5) bureau ;;
       6) raccourcis ;;
       7) serveur_ssh ;;
-      8) infos ;;
-      9) mise_a_jour ;;
-      10) ia ;;
-      11) installer_ia ;;
-      12) serveur_ia && liste_modeles && { echo; read -rp "Télécharger (t), activer (a) ou rien (Entrée) ? " r
+      8) sessions_menu ;;
+      9) infos ;;
+      10) mise_a_jour ;;
+      11) ia ;;
+      12) installer_ia ;;
+      13) serveur_ia && liste_modeles && { echo; read -rp "Télécharger (t), activer (a) ou rien (Entrée) ? " r
          case "$r" in t|T) telecharger ;; a|A) activer ;; esac; } ;;
-      13) supprimer ;;
+      14) supprimer ;;
       0|q) exit 0 ;;
       *) echo "Choix inconnu" ;;
     esac
@@ -267,6 +292,7 @@ case "${1:-}" in
   catalogue) shift; exec catalogue "$@" ;;
   bureau) shift; exec bureau "$@" ;;
   raccourcis) raccourcis ;;
+  sessions) sessions_menu ;;
   ssh) serveur_ssh ;;
   infos) infos ;;
   maj) mise_a_jour ;;
