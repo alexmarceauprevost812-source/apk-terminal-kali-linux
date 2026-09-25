@@ -256,7 +256,7 @@ commande s'appelle **`claude`**.
 > ℹ️ Installez-le depuis le **terminal Android** (pas depuis Kali) : tapez `exit`
 > si vous êtes dans Kali.
 
-## 🇫🇷 Toujours en français
+## 🇫🇷 Toujours en français et en couleurs
 
 Tout le terminal parle français, y compris les IA :
 
@@ -270,8 +270,22 @@ Tout le terminal parle français, y compris les IA :
   consigne « réponds toujours en français » intégrée (`ollama create`), puis réutilisée
   — aucun re-téléchargement, juste une configuration locale.
 
-Pour l'activer sur un téléphone déjà installé : `magie-update`, puis `kali francais`
-(seulement si Kali est installé — sinon rien à faire de plus, c'est automatique).
+Et le terminal a des **couleurs** dès qu'on tape une commande — pas seulement dans le
+menu `magie` : `ls`, `grep`, `diff`, `man`, `less`, et un **✖ rouge** quand une commande
+échoue. Activées par défaut, dans Termux comme dans Kali :
+
+```bash
+couleurs off    # tout couper (nouvelle session)
+couleurs on     # réactiver
+kali couleurs   # (re)activer les couleurs à l'intérieur de Kali
+```
+
+`kali couleurs` s'applique automatiquement à l'installation de Kali et à chaque
+`kali maj`. Le fichier est `config/couleurs.bashrc`.
+
+Pour l'activer sur un téléphone déjà installé : `magie-update` (met aussi les couleurs
+à jour), puis `kali francais` et `kali couleurs` (seulement si Kali est installé — sinon
+rien à faire de plus, c'est automatique).
 
 ## 🖥️ Bureau graphique (comme un ordinateur)
 
@@ -346,6 +360,7 @@ bin/magie-installer     installation complète (depuis l'APK)
 bin/magie-update        met à jour l'app et vérifie la nouvelle APK
 config/termux.properties barre de touches, raccourcis, historique
 config/avance.bashrc    autocomplétion, fzf, zoxide, alias
+config/couleurs.bashrc  couleurs des commandes (ls, grep, diff, man…) + erreurs en rouge
 config/kali-auto.bashrc ouvre Kali à chaque nouvelle session
 config/kali-outils.txt  outils Kali installés automatiquement
 config/kali-guide.txt   guide (rôle + exemples) de chaque outil

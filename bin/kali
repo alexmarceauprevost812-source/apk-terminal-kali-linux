@@ -4,6 +4,7 @@
 #   kali installer       → (ré)installer Kali Linux
 #   kali maj             → mettre Kali à jour (apt full-upgrade)
 #   kali francais        → passer Kali en français (locale fr_FR.UTF-8)
+#   kali couleurs        → activer les couleurs des commandes dans Kali
 #   kali diagnostic      → vérifie proot-distro, Internet, espace disque
 #   kali outils          → (ré)installer les outils Kali de base
 #   kali outils complet  → installer TOUS les outils (kali-linux-headless)
@@ -131,6 +132,7 @@ installer() {
 
   installer_outils
   francais_kali
+  couleurs_kali
 
   # Thème : fond noir, texte blanc, nom d'utilisateur vert lime
   mkdir -p "$PREFIX/tmp"
@@ -169,13 +171,27 @@ EOF2
   ' || echo -e "${jaune}➜ Français partiel : relancez « kali francais » plus tard.${fin}"
 }
 
+# Couleurs des commandes dans Kali (fichier chargé depuis /root/.bashrc).
+couleurs_kali() {
+  mkdir -p "$PREFIX/tmp"
+  cp "$(fichier_config couleurs.bashrc)" "$PREFIX/tmp/magie-couleurs.bashrc" 2>/dev/null || return 0
+  proot-distro login --shared-tmp "$NOM" -- bash -c '
+    mkdir -p /root/.magie
+    cp /tmp/magie-couleurs.bashrc /root/.magie/couleurs.bashrc
+    grep -q "magie-couleurs" /root/.bashrc 2>/dev/null || echo "[ -r \"\$HOME/.magie/couleurs.bashrc\" ] && . \"\$HOME/.magie/couleurs.bashrc\"  # magie-couleurs" >> /root/.bashrc
+  '
+  rm -f "$PREFIX/tmp/magie-couleurs.bashrc"
+}
+
 case "${1:-}" in
   installer) installer ;;
+  couleurs) kali_installe || installer || exit 1; couleurs_kali; echo "✔ Couleurs activées dans Kali (nouvelle session)" ;;
   francais|français) kali_installe || installer || exit 1; francais_kali ;;
   maj)
     kali_installe || installer || exit 1
     proot-distro login "$NOM" -- bash -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y'
-    francais_kali ;;
+    francais_kali
+    couleurs_kali ;;
   outils) installer_outils "${2:-}" ;;
   diagnostic|diag) diagnostic ;;
   guide) shift; exec guide "$@" ;;
@@ -201,6 +217,6 @@ case "${1:-}" in
     kali_installe || installer || exit 1
     exec proot-distro login --shared-tmp "$NOM" ;;
   -h|--help|aide)
-    sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//' ;;
+    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) echo -e "${rouge}✖ Commande inconnue : $1${fin} (voir « kali aide »)"; exit 1 ;;
 esac

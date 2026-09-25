@@ -31,6 +31,15 @@ plus_recent() {
   [ "$plus_grand" = "$2" ] && [ "$1" != "$2" ]
 }
 
+# Couleurs des commandes : le fichier est chargé depuis ~/.bashrc (donc mis à jour sans réinstaller).
+activer_couleurs() {
+  mkdir -p "$DOSSIER"
+  [ -f "$MAGIE/config/couleurs.bashrc" ] && cp "$MAGIE/config/couleurs.bashrc" "$DOSSIER/couleurs.bashrc"
+  if ! grep -q "magie-couleurs" "$HOME/.bashrc" 2>/dev/null; then
+    echo '[ -r "$HOME/.magie/couleurs.bashrc" ] && . "$HOME/.magie/couleurs.bashrc"  # magie-couleurs' >> "$HOME/.bashrc"
+  fi
+}
+
 maj_commandes() {
   echo -e "${lime}➜ Mise à jour des commandes (magie, kali, guide, bureau, ia…)…${fin}"
   local tmp; tmp="$(mktemp -d)"
@@ -44,12 +53,13 @@ maj_commandes() {
   done
   mkdir -p "$MAGIE/config"
   for f in modeles.txt kali-outils.txt kali-guide.txt kali-catalogue.txt colors.properties \
-           theme.bashrc avance.bashrc termux.properties kali-auto.bashrc; do
+           theme.bashrc avance.bashrc couleurs.bashrc termux.properties kali-auto.bashrc; do
     curl -fsSL --max-time 15 "$DEPOT_RAW/config/$f" -o "$MAGIE/config/$f" 2>/dev/null || true
   done
   curl -fsSL --max-time 20 "$DEPOT_RAW/config/fond-ecran.png" -o "$MAGIE/config/fond-ecran.png" 2>/dev/null || true
   cp "$MAGIE/config/modeles.txt" "$DOSSIER/modeles.txt" 2>/dev/null || true
   rm -rf "$tmp"
+  activer_couleurs
   [ "$ok" -eq 1 ] && echo -e "${lime}✔ Commandes à jour${fin}" \
     || echo -e "${jaune}➜ Certaines commandes n'ont pas pu être téléchargées (réseau ?)${fin}"
 }

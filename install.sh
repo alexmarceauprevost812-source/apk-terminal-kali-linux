@@ -118,6 +118,11 @@ fi
 if ! grep -q "magie-theme" "$HOME/.bashrc" 2>/dev/null; then
   { echo; cat "$REPO_DIR/config/theme.bashrc"; } >> "$HOME/.bashrc"
 fi
+mkdir -p "$HOME/.magie"
+cp "$REPO_DIR/config/couleurs.bashrc" "$HOME/.magie/couleurs.bashrc"
+if ! grep -q "magie-couleurs" "$HOME/.bashrc" 2>/dev/null; then
+  echo '[ -r "$HOME/.magie/couleurs.bashrc" ] && . "$HOME/.magie/couleurs.bashrc"  # magie-couleurs' >> "$HOME/.bashrc"
+fi
 termux-reload-settings 2>/dev/null || true
 ok "Thème, barre de touches spéciales et raccourcis appliqués"
 
