@@ -99,3 +99,30 @@ maltego | Cartographie OSINT (graphique)
 faraday | Plateforme collaborative de pentest
 pipal | Statistiques sur des mots de passe
 cutycapt | Capture d'écran d'une page web
+
+#Défense et détection
+fail2ban | Bloque les IP qui tentent de forcer un accès
+suricata | Détection et prévention d'intrusions réseau
+snort | Détection d'intrusions réseau (classique)
+aide | Détecte les fichiers modifiés sur le système
+auditd | Journal d'audit de sécurité du système
+logwatch | Résumé quotidien des journaux du système
+arpwatch | Surveille les changements d'adresses sur le réseau
+
+#Protection du système
+ufw | Pare-feu simple à utiliser
+iptables | Pare-feu de base de Linux
+clamav | Antivirus libre
+rkhunter | Cherche les rootkits (programmes espions cachés)
+chkrootkit | Deuxième détecteur de rootkits
+apparmor | Restreint ce que chaque programme peut faire
+cryptsetup | Chiffrement de disques et de partitions
+gnupg | Chiffrement et signature (GPG)
+openvpn | Réseau privé virtuel (VPN)
+wireguard-tools | VPN moderne et rapide
+tor | Navigation anonyme via le réseau Tor
+
+#Gestion de mots de passe
+keepassxc | Coffre-fort de mots de passe (chiffré)
+pwgen | Génère des mots de passe solides
+libpam-pwquality | Impose des mots de passe solides sur le système

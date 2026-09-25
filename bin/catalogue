@@ -90,7 +90,7 @@ installer() {
   echo -e "${lime}➜ Installation dans Kali : $* ${fin}"
   echo -e "${jaune}   (Wi-Fi conseillé.)${fin}"
   dans_kali_run "export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y $*; apt-get clean" \
-    && echo -e "${lime}✔ Terminé. Détails d'un outil :  guide <nom>${fin}" \
+    && echo -e "${lime}✔ Terminé. Détails :  guide <nom>  ·  Vos outils classés :  bibliotheque${fin}" \
     || echo -e "${jaune}➜ Certains paquets n'ont pas pu être installés.${fin}"
   charger_installes
 }

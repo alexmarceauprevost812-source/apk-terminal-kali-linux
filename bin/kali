@@ -10,6 +10,7 @@
 #   kali outils complet  → installer TOUS les outils (kali-linux-headless)
 #   kali guide [outil]   → guide : ce que fait chaque outil (+ exemples)
 #   kali catalogue       → parcourir/installer les outils par catégorie
+#   kali bibliotheque    → mes outils installés, classés par famille
 #   kali bureau          → bureau graphique XFCE (via VNC)
 #   kali auto on|off     → ouvrir Kali automatiquement à chaque nouvelle session
 #   kali -- commande     → lancer une commande dans Kali
@@ -196,6 +197,7 @@ case "${1:-}" in
   diagnostic|diag) diagnostic ;;
   guide) shift; exec guide "$@" ;;
   catalogue) shift; exec catalogue "$@" ;;
+  bibliotheque|bibliothèque) shift; exec bibliotheque "$@" ;;
   bureau) shift; exec bureau "$@" ;;
   auto)
     mkdir -p "$DOSSIER"
@@ -217,6 +219,6 @@ case "${1:-}" in
     kali_installe || installer || exit 1
     exec proot-distro login --shared-tmp "$NOM" ;;
   -h|--help|aide)
-    sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//' ;;
+    sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) echo -e "${rouge}✖ Commande inconnue : $1${fin} (voir « kali aide »)"; exit 1 ;;
 esac

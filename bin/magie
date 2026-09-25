@@ -204,6 +204,7 @@ aide() {
   kali outils            installer les outils Kali (nmap, sqlmap, hydra…)
   guide [outil]          ce que font les outils Kali (+ exemples)
   catalogue              parcourir/installer les outils par catégorie
+  bibliotheque           mes outils installés, classés (attaque, défense, protection, mots de passe…)
   bureau                 bureau graphique Kali (XFCE via VNC)
   magie raccourcis       touches spéciales et raccourcis
   magie sessions         ouvrir / fermer (supprimer 🗑) des sessions
@@ -296,6 +297,7 @@ case "${1:-}" in
   outils) outils_kali ;;
   guide) shift; exec guide "$@" ;;
   catalogue) shift; exec catalogue "$@" ;;
+  bibliotheque|bibliothèque) shift; exec bibliotheque "$@" ;;
   bureau) shift; exec bureau "$@" ;;
   raccourcis) raccourcis ;;
   sessions) sessions_menu ;;

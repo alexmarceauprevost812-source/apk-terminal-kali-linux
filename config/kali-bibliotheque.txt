@@ -1,0 +1,9 @@
+# Bibliothèque : regroupe les catégories du catalogue en grandes familles.
+# Format :  identifiant | Nom affiché | catégories du catalogue séparées par ;
+attaque | 🗡️  Attaque | Applications web;Bases de données;Exploitation;Attaques sans fil;Ingénierie sociale;Post-exploitation
+mdp | 🔑 Mots de passe | Attaques de mots de passe;Gestion de mots de passe
+defense | 🛡️  Défense | Défense et détection
+protection | 🔒 Protection | Protection du système
+reconnaissance | 🔎 Reconnaissance et analyse | Collecte d'informations;Analyse de vulnérabilités
+reseau | 📡 Écoute du réseau | Écoute et usurpation
+analyse | 🔬 Analyse et forensique | Forensique (analyse);Rétro-ingénierie;Rapports

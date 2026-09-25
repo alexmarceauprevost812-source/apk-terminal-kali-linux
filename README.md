@@ -200,6 +200,20 @@ catalogue installer nmap sqlmap   # installe directement
 `config/kali-catalogue.txt`. Depuis une catégorie, tapez les numéros à installer,
 ou `g <outil>` pour ouvrir le guide.
 
+### Bibliothèque : mes outils installés, classés
+
+```
+bibliotheque             # tous mes outils installés, par famille, de A à Z
+bibliotheque attaque     # une seule famille (attaque, mdp, defense, protection,
+                         #   reconnaissance, reseau, analyse, autres)
+bibliotheque manque      # ce qu'il reste à installer, par famille
+bibliotheque familles    # liste des familles
+```
+
+Les familles sont définies dans `config/kali-bibliotheque.txt` ; les outils viennent de
+`config/kali-catalogue.txt` (qui contient maintenant aussi *Défense et détection*,
+*Protection du système* et *Gestion de mots de passe*). Aussi : `kali bibliotheque`.
+
 ## 📖 Guide des outils
 
 Chaque outil est expliqué : à quoi il sert, en une phrase simple, avec un exemple.
@@ -353,6 +367,7 @@ bin/magie               menu magique
 bin/kali                terminal Kali Linux (installation, mise à jour, auto)
 bin/guide               guide : ce que fait chaque outil Kali
 bin/catalogue           catalogue des outils par catégorie (installe)
+bin/bibliotheque        mes outils installés, classés par famille
 bin/bureau              bureau graphique XFCE (via VNC)
 bin/ia                  question rapide à l'IA / « ia commande » (propose + exécute)
 bin/claude-code         installe et lance Claude Code (officiel Anthropic)
@@ -365,6 +380,7 @@ config/kali-auto.bashrc ouvre Kali à chaque nouvelle session
 config/kali-outils.txt  outils Kali installés automatiquement
 config/kali-guide.txt   guide (rôle + exemples) de chaque outil
 config/kali-catalogue.txt outils classés par catégorie (kali.org/tools)
+config/kali-bibliotheque.txt familles de la bibliothèque (attaque, défense…)
 config/fond-ecran.png   fond d'écran par défaut du bureau
 apk/icone.png           (optionnel) icône de l'application
 apk/construire.sh       construit l'APK Terminal Magique

@@ -1,0 +1,118 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# bibliotheque — vos outils installés, classés par famille.
+#   bibliotheque              → toute la bibliothèque (Attaque, Défense, Protection, Mots de passe…)
+#   bibliotheque attaque      → une seule famille
+#   bibliotheque familles     → liste des familles
+#   bibliotheque manque       → ce qu'il reste à installer, par famille
+# Familles : attaque, mdp, defense, protection, reconnaissance, reseau, analyse, autres
+# Installer un outil :  catalogue     ·  Détail d'un outil :  guide <nom>
+set -uo pipefail
+
+NOM="kali"
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; cyan='\033[1;36m'; jaune='\033[1;33m'; gris='\033[0;90m'; fin='\033[0m'
+
+DANS_KALI=0
+grep -qi '^ID=kali' /etc/os-release 2>/dev/null && DANS_KALI=1
+
+fichier() {
+  for d in "$PREFIX/share/magie/config" "/usr/local/share/magie/config" "$HOME/.magie/config" \
+           "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)/config"; do
+    [ -f "$d/$1" ] && { echo "$d/$1"; return 0; }
+  done
+  return 1
+}
+CATALOGUE="$(fichier kali-catalogue.txt)" || { echo "Catalogue introuvable."; exit 1; }
+FAMILLES="$(fichier kali-bibliotheque.txt)" || { echo "kali-bibliotheque.txt introuvable (lancez magie-update)."; exit 1; }
+OUTILS="$(fichier kali-outils.txt 2>/dev/null || true)"
+
+run_kali() {
+  if [ "$DANS_KALI" -eq 1 ]; then bash -c "$1"; else proot-distro login "$NOM" -- bash -c "$1"; fi
+}
+case "${1:-}" in
+  aide|-h|--help|familles) ;;
+  *)
+    if [ "$DANS_KALI" -eq 0 ] && ! { command -v proot-distro >/dev/null 2>&1 && proot-distro login "$NOM" -- true >/dev/null 2>&1; }; then
+      echo -e "${jaune}✖ Kali n'est pas installé. Tapez :  kali installer${fin}"; exit 1
+    fi ;;
+esac
+INSTALLES="$(run_kali "dpkg-query -W -f='\${Package}\n' 2>/dev/null" 2>/dev/null)"
+est_installe() { grep -qxF "$1" <<<"$INSTALLES"; }
+
+# Paquets « pkg|description » d'une catégorie du catalogue
+outils_categorie() {
+  awk -v c="#$1" -F'\n' 'r&&/^#/{r=0} $0==c{r=1;next} r&&NF' "$CATALOGUE"
+}
+
+# Affiche une famille : ne montre que les outils INSTALLÉS, triés A→Z, sans doublon.
+# Renvoie le nombre d'outils affichés dans $NB.
+afficher_famille() {
+  local nom="$1" cats="$2" mode="${3:-installes}" ligne pkg desc
+  local liste=""
+  IFS=';' read -ra tab <<<"$cats"
+  for cat in "${tab[@]}"; do
+    liste+="$(outils_categorie "$cat")"$'\n'
+  done
+  NB=0
+  local sortie=""
+  while IFS='|' read -r pkg desc; do
+    pkg="$(echo "$pkg" | xargs)"; desc="$(echo "$desc" | sed 's/^ *//')"
+    [ -z "$pkg" ] && continue
+    if [ "$mode" = installes ] && est_installe "$pkg"; then
+      sortie+="$(printf "   ${jaune}%-22s${fin} %s" "$pkg" "$desc")"$'\n'; NB=$((NB+1))
+    elif [ "$mode" = manque ] && ! est_installe "$pkg"; then
+      sortie+="$(printf "   ${gris}%-22s${fin} ${gris}%s${fin}" "$pkg" "$desc")"$'\n'; NB=$((NB+1))
+    fi
+  done < <(sort -u -t'|' -k1,1 <<<"$liste")
+  echo -e "\n${cyan}▊ $nom${fin}  ${blanc}($NB)${fin}"
+  if [ "$NB" -gt 0 ]; then printf '%s' "$sortie"; else
+    [ "$mode" = installes ] && echo -e "   ${gris}(rien d'installé ici — voir « catalogue »)${fin}" || echo -e "   ${gris}(tout est installé ✔)${fin}"
+  fi
+}
+
+# Outils installés par défaut qui ne sont pas dans le catalogue (git, curl, python…)
+afficher_autres() {
+  [ -z "$OUTILS" ] && return 0
+  local connus; connus="$(grep '|' "$CATALOGUE" | cut -d'|' -f1 | xargs -n1)"
+  local sortie="" n=0 p
+  while read -r p; do
+    [ -z "$p" ] && continue
+    grep -qxF "$p" <<<"$connus" && continue
+    est_installe "$p" && { sortie+="$p  "; n=$((n+1)); }
+  done < <(grep -vE '^\s*#|^\s*$' "$OUTILS" | sort -u)
+  echo -e "\n${cyan}▊ 🧰 Autres outils${fin}  ${blanc}($n)${fin}"
+  [ "$n" -gt 0 ] && echo -e "   ${jaune}${sortie}${fin}"
+}
+
+cmd="${1:-tout}"
+case "$cmd" in
+  -h|--help|aide) sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' ;;
+  familles)
+    echo -e "${lime}📚 Familles de la bibliothèque${fin}\n"
+    grep -vE '^\s*#|^\s*$' "$FAMILLES" | while IFS='|' read -r id nom _; do
+      printf "  ${lime}%-15s${fin} %s\n" "$(echo $id)" "$(echo $nom | sed 's/^ *//')"
+    done
+    printf "  ${lime}%-15s${fin} %s\n" autres "🧰 Autres outils" ;;
+  tout|"")
+    echo -e "${lime}📚 Ma bibliothèque d'outils (installés, classés par famille)${fin}"
+    total=0
+    while IFS='|' read -r id nom cats; do
+      afficher_famille "$(echo $nom | sed 's/^ *//')" "$(echo $cats | sed 's/^ *//')"; total=$((total+NB))
+    done < <(grep -vE '^\s*#|^\s*$' "$FAMILLES")
+    afficher_autres
+    echo -e "\n${lime}✔ $total outils classés.${fin}  Détail : ${blanc}guide <nom>${fin}  ·  En ajouter : ${blanc}catalogue${fin}  ·  Manquants : ${blanc}bibliotheque manque${fin}" ;;
+  manque)
+    echo -e "${lime}📚 Outils du catalogue pas encore installés${fin}"
+    while IFS='|' read -r id nom cats; do
+      afficher_famille "$(echo $nom | sed 's/^ *//')" "$(echo $cats | sed 's/^ *//')" manque
+    done < <(grep -vE '^\s*#|^\s*$' "$FAMILLES")
+    echo -e "\n  Installer :  ${blanc}catalogue installer <nom>${fin}" ;;
+  autres) afficher_autres ;;
+  *)
+    ligne="$(grep -E "^${cmd//[^a-z]/} *\|" "$FAMILLES" | head -n1)"
+    if [ -z "$ligne" ]; then
+      echo -e "${jaune}Famille inconnue : $cmd${fin}  (voir :  bibliotheque familles)"; exit 1
+    fi
+    IFS='|' read -r id nom cats <<<"$ligne"
+    afficher_famille "$(echo $nom | sed 's/^ *//')" "$(echo $cats | sed 's/^ *//')" ;;
+esac
