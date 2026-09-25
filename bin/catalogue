@@ -1,0 +1,135 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# catalogue — parcourir les outils Kali par catégorie, voir ce qu'ils font, les installer.
+#   catalogue            → menu des catégories
+#   catalogue web         → cherche « web » dans tout le catalogue
+#   catalogue installer nmap sqlmap   → installe des outils directement
+# ⚠️ N'utilisez ces outils que sur vos appareils/réseaux ou avec autorisation.
+set -uo pipefail
+
+NOM="kali"
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; gras='\033[1;97m'; cyan='\033[1;36m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
+
+# Sommes-nous déjà DANS Kali (bureau/terminal Kali) ou dans Termux ?
+DANS_KALI=0
+grep -qi '^ID=kali' /etc/os-release 2>/dev/null && DANS_KALI=1
+
+fichier_cat() {
+  for f in "$PREFIX/share/magie/config/kali-catalogue.txt" \
+           "/usr/local/share/magie/config/kali-catalogue.txt" \
+           "$HOME/.magie/config/kali-catalogue.txt" \
+           "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)/config/kali-catalogue.txt"; do
+    [ -f "$f" ] && { echo "$f"; return 0; }
+  done
+  return 1
+}
+FICHIER="$(fichier_cat)" || { echo "Catalogue introuvable (config/kali-catalogue.txt)."; exit 1; }
+
+# Exécute une commande dans Kali (via proot depuis Termux), ou directement si déjà dans Kali.
+dans_kali_run() {
+  if [ "$DANS_KALI" -eq 1 ]; then bash -c "$1"; else proot-distro login "$NOM" -- bash -c "$1"; fi
+}
+kali_ok() {
+  [ "$DANS_KALI" -eq 1 ] && return 0
+  command -v proot-distro >/dev/null 2>&1 && proot-distro login "$NOM" -- true >/dev/null 2>&1
+}
+
+# Liste des paquets déjà installés dans Kali (une fois, en cache)
+INSTALLES=""
+charger_installes() {
+  kali_ok && INSTALLES="$(dans_kali_run "dpkg-query -W -f='\${Package}\n' 2>/dev/null" 2>/dev/null)"
+}
+est_installe() { grep -qxF "$1" <<<"$INSTALLES"; }
+
+# Noms des catégories (lignes commençant par #, après l'en-tête de fichier)
+categories() { grep '^#' "$FICHIER" | grep -v '^# ' | sed 's/^#//'; }
+
+lister_categories() {
+  echo -e "${lime}🐉 Catalogue des outils Kali — catégories${fin}\n"
+  local i=1
+  while IFS= read -r c; do
+    local n; n="$(awk -v c="#$c" -F'|' 'r&&/^#/{r=0} $0==c{r=1;next} r&&NF{k++} END{print k+0}' "$FICHIER")"
+    printf "  ${lime}%2d${fin}) %-28s ${blanc}%s outils${fin}\n" "$i" "$c" "$n"
+    i=$((i+1))
+  done < <(categories)
+  echo -e "\n  ${blanc}Tapez un numéro, un nom d'outil, ou 'q' pour quitter.${fin}"
+}
+
+# Affiche les outils d'une catégorie et propose d'en installer
+ouvrir_categorie() {
+  local cat="$1"
+  echo -e "\n${cyan}▊ $cat${fin}\n"
+  local -a paquets=()
+  local i=1
+  while IFS='|' read -r pkg desc; do
+    pkg="$(echo "$pkg" | xargs)"; desc="$(echo "$desc" | sed 's/^ *//')"
+    [ -z "$pkg" ] && continue
+    paquets+=("$pkg")
+    local etat="  "; est_installe "$pkg" && etat="✅"
+    printf "  %s ${lime}%2d${fin}) ${gras}%-22s${fin} %s\n" "$etat" "$i" "$pkg" "$desc"
+    i=$((i+1))
+  done < <(awk -v c="#$cat" -F'\n' 'r&&/^#/{r=0} $0==c{r=1;next} r&&NF' "$FICHIER")
+  echo -e "\n  ✅ = déjà installé"
+  echo -e "  ${blanc}Numéros à installer (ex. 1 3 5), 'g <outil>' pour le guide, Entrée pour revenir.${fin}"
+  read -rp "  > " rep
+  [ -z "$rep" ] && return 0
+  if [[ "$rep" =~ ^g[[:space:]] ]]; then
+    command -v guide >/dev/null 2>&1 && guide "${rep#g }" | ${PAGER:-less -R}; return 0
+  fi
+  local -a a_installer=()
+  for token in $rep; do
+    [[ "$token" =~ ^[0-9]+$ ]] && [ -n "${paquets[$((token-1))]:-}" ] && a_installer+=("${paquets[$((token-1))]}")
+  done
+  [ ${#a_installer[@]} -gt 0 ] && installer "${a_installer[@]}"
+}
+
+installer() {
+  if ! kali_ok; then
+    echo -e "${rouge}✖ Installez d'abord Kali :  kali installer${fin}"; return 1
+  fi
+  echo -e "${lime}➜ Installation dans Kali : $* ${fin}"
+  echo -e "${jaune}   (Wi-Fi conseillé.)${fin}"
+  dans_kali_run "export DEBIAN_FRONTEND=noninteractive; apt-get update; apt-get install -y $*; apt-get clean" \
+    && echo -e "${lime}✔ Terminé. Détails d'un outil :  guide <nom>${fin}" \
+    || echo -e "${jaune}➜ Certains paquets n'ont pas pu être installés.${fin}"
+  charger_installes
+}
+
+rechercher() {
+  echo -e "${lime}🔎 Résultats pour « $1 » :${fin}\n"
+  awk -v q="$1" -F'|' '
+    /^#[^ ]/{cat=$0; sub(/^#/,"",cat)}
+    /\|/{
+      pkg=$1; gsub(/^[ ]+|[ ]+$/,"",pkg);
+      desc=$2; gsub(/^[ ]+/,"",desc);
+      if (index(tolower(pkg" "desc" "cat), tolower(q)))
+        printf "  \033[1;97m%-20s\033[0m \033[0;97m[%s]\033[0m %s\n", pkg, cat, desc
+    }' "$FICHIER"
+  echo -e "\n  Installer :  catalogue installer <nom>    ·  Détail :  guide <nom>"
+}
+
+menu() {
+  charger_installes
+  while true; do
+    echo
+    lister_categories
+    read -rp "  > " c
+    case "$c" in
+      q|quitter|0) return 0 ;;
+      "" ) ;;
+      *[!0-9]* )
+        # nom d'outil → recherche
+        rechercher "$c" ;;
+      * )
+        local cat; cat="$(categories | sed -n "${c}p")"
+        [ -n "$cat" ] && ouvrir_categorie "$cat" || echo "Numéro invalide." ;;
+    esac
+  done
+}
+
+case "${1:-}" in
+  "" ) menu ;;
+  installer) shift; installer "$@" ;;
+  -h|--help|aide) sed -n '2,5p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) rechercher "$*" ;;
+esac

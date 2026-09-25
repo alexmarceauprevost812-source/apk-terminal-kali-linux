@@ -1,0 +1,101 @@
+# Catalogue des outils Kali, classés par catégorie (comme https://www.kali.org/tools/).
+# Format :  #Catégorie   puis   paquet | description courte
+# Le paquet s'installe avec apt dans Kali. ⚠️ Usage autorisé uniquement.
+
+#Collecte d'informations
+nmap | Scanner de réseau : machines et ports ouverts
+masscan | Scanner de ports très rapide
+dnsrecon | Reconnaissance et énumération DNS
+dnsenum | Énumération d'un domaine (DNS, sous-domaines)
+fierce | Recherche de sous-domaines
+theharvester | Récolte d'e-mails, noms, sous-domaines
+recon-ng | Cadre de reconnaissance (façon Metasploit)
+maltego | Cartographie de liens (OSINT, interface graphique)
+spiderfoot | Automatisation OSINT
+whois | Infos publiques d'un domaine
+netdiscover | Découverte d'hôtes sur le réseau local
+
+#Analyse de vulnérabilités
+nikto | Failles connues d'un serveur web
+wapiti | Scanner de vulnérabilités web
+legion | Scanner réseau et vulnérabilités (graphique)
+unix-privesc-check | Cherche des élévations de privilèges (Unix)
+lynis | Audit de sécurité d'un système Linux
+
+#Applications web
+burpsuite | Proxy d'audit web (interception, le standard)
+zaproxy | OWASP ZAP : proxy d'audit web (libre)
+sqlmap | Injection SQL automatisée
+wpscan | Analyse de sécurité WordPress
+whatweb | Détecte les technologies d'un site
+dirb | Cherche des dossiers/pages cachés
+gobuster | Brute-force de répertoires/DNS (rapide)
+ffuf | Fuzzing web très rapide
+wfuzz | Fuzzing de paramètres web
+commix | Injection de commandes automatisée
+
+#Bases de données
+sqlmap | Injection SQL automatisée
+sqlitebrowser | Ouvre et édite des bases SQLite
+
+#Attaques de mots de passe
+john | John the Ripper : casse des empreintes
+hashcat | Casse d'empreintes (CPU/GPU)
+hydra | Test de mots de passe sur un service
+medusa | Test de mots de passe en parallèle
+crunch | Génère des listes de mots de passe
+cewl | Crée une liste de mots à partir d'un site
+wordlists | Listes de mots (rockyou, etc.)
+hash-identifier | Identifie le type d'une empreinte
+
+#Attaques sans fil
+aircrack-ng | Suite d'audit Wi-Fi (limité sans root/carte)
+reaver | Attaque WPS
+wifite | Automatise les audits Wi-Fi
+bettercap | Attaques réseau et Wi-Fi/Bluetooth
+kismet | Détection et sniffing sans fil
+
+#Rétro-ingénierie
+radare2 | Analyse et désassemblage de binaires
+ghidra | Rétro-ingénierie (NSA, graphique)
+gdb | Débogueur de programmes
+apktool | Décompile/recompile des APK Android
+jadx | Décompile des APK en code Java
+
+#Exploitation
+metasploit-framework | Cadre d'exploitation (msfconsole)
+searchsploit | Recherche d'exploits (Exploit-DB) — paquet exploitdb
+exploitdb | Base d'exploits locale + searchsploit
+set | Social-Engineer Toolkit
+beef-xss | Cadre d'exploitation de navigateurs
+
+#Écoute et usurpation
+wireshark | Analyse du trafic réseau (graphique)
+tcpdump | Capture du trafic en ligne de commande
+ettercap-graphical | Attaques « homme du milieu »
+bettercap | Boîte à outils réseau moderne
+responder | Empoisonnement LLMNR/NBT-NS
+mitmproxy | Proxy HTTPS d'interception
+
+#Post-exploitation
+mimikatz | Récupération d'identifiants Windows
+powersploit | Modules PowerShell offensifs
+weevely | Webshell PHP furtif
+netcat-traditional | Connexions réseau à la main (nc)
+
+#Forensique (analyse)
+autopsy | Analyse forensique (interface graphique)
+sleuthkit | Boîte à outils d'analyse de disque
+binwalk | Analyse de firmwares
+foremost | Récupération de fichiers effacés
+volatility3 | Analyse de mémoire vive
+exiftool | Lit/écrit les métadonnées des fichiers
+
+#Ingénierie sociale
+set | Social-Engineer Toolkit
+maltego | Cartographie OSINT (graphique)
+
+#Rapports
+faraday | Plateforme collaborative de pentest
+pipal | Statistiques sur des mots de passe
+cutycapt | Capture d'écran d'une page web

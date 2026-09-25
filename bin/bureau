@@ -3,6 +3,7 @@
 #   bureau installer     → installe le bureau XFCE + le serveur d'affichage dans Kali
 #   bureau               → démarre le bureau et explique comment l'afficher
 #   bureau fond [image]  → change le fond d'écran (défaut, ou votre photo)
+#   bureau icones        → (re)crée les icônes du bureau (Terminal, Catalogue…)
 #   bureau arreter       → arrête le bureau
 # Pour VOIR le bureau : installez une appli « VNC Viewer » sur Android
 # et connectez-vous à  localhost:1  (mot de passe défini à l'installation).
@@ -85,9 +86,50 @@ XS
   # Fond d'écran par défaut (thème noir / vert lime)
   local defaut; defaut="$(fichier_fond_defaut || true)"
   [ -n "$defaut" ] && appliquer_fond "$defaut"
-  echo -e "${lime}✔ Bureau installé (avec fond d'écran). Lancez-le avec :  bureau${fin}"
+  # Icônes sur le bureau (Terminal, Catalogue, Guide, Navigateur) — comme un ordinateur
+  creer_raccourcis
+  echo -e "${lime}✔ Bureau installé (fond + icônes). Lancez-le avec :  bureau${fin}"
   echo -e "   Installez une appli VNC Viewer sur Android (Play Store, gratuit)."
   echo -e "   Pour mettre votre photo en fond :  bureau fond /chemin/vers/image.jpg"
+}
+
+# Installe guide + catalogue (et leurs fichiers) DANS Kali, pour les icônes du bureau.
+installer_outils_bureau() {
+  local base="$PREFIX/share/magie"
+  [ -d "$base" ] || base="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)"
+  install -D -m 755 "$base/bin/guide"     "$ROOTFS/usr/local/bin/guide"     2>/dev/null || true
+  install -D -m 755 "$base/bin/catalogue" "$ROOTFS/usr/local/bin/catalogue" 2>/dev/null || true
+  for f in kali-guide.txt kali-catalogue.txt; do
+    install -D -m 644 "$base/config/$f" "$ROOTFS/usr/local/share/magie/config/$f" 2>/dev/null || true
+  done
+}
+
+# Crée des icônes cliquables sur le bureau XFCE (comme un ordinateur).
+creer_raccourcis() {
+  installer_outils_bureau
+  dans_kali bash -c '
+    mkdir -p /root/Desktop
+    ecrire() { # $1=fichier $2=Nom $3=commande $4=icone
+      cat > "/root/Desktop/$1.desktop" <<D
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=$2
+Exec=$3
+Icon=$4
+Terminal=$5
+D
+      chmod +x "/root/Desktop/$1.desktop"
+      # Marque le lanceur comme fiable pour XFCE
+      command -v gio >/dev/null 2>&1 && gio set "/root/Desktop/$1.desktop" metadata::xfce-exe-checksum "$(sha256sum "/root/Desktop/$1.desktop" | cut -d" " -f1)" 2>/dev/null || true
+    }
+    ecrire 00-terminal  "Terminal Kali"     "xfce4-terminal"                                  utilities-terminal        true
+    ecrire 01-catalogue "Catalogue outils"  "xfce4-terminal --title=Catalogue -e catalogue"   system-software-install   true
+    ecrire 02-guide     "Guide des outils"  "xfce4-terminal --title=Guide -e \"bash -c \\\"guide | less -R\\\"\"" help-browser  true
+    ecrire 03-fichiers  "Fichiers"          "thunar"                                          system-file-manager       false
+    command -v firefox        >/dev/null 2>&1 && ecrire 04-web "Navigateur Web" "firefox"        firefox-esr false
+    command -v firefox-esr    >/dev/null 2>&1 && ecrire 04-web "Navigateur Web" "firefox-esr"    firefox-esr false
+  ' 2>/dev/null || true
 }
 
 fond() {
@@ -144,8 +186,9 @@ arreter() {
 case "${1:-}" in
   installer) installer ;;
   fond) fond "${2:-}" ;;
+  icones|raccourcis) verifier_kali; creer_raccourcis && echo -e "${lime}✔ Icônes du bureau recréées${fin}" ;;
   arreter|stop) arreter ;;
   ""|demarrer|start) demarrer ;;
-  -h|--help|aide) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
-  *) echo "Usage : bureau [installer|fond|arreter]"; exit 1 ;;
+  -h|--help|aide) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) echo "Usage : bureau [installer|fond|icones|arreter]"; exit 1 ;;
 esac

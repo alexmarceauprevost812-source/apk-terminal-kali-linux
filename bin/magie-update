@@ -35,7 +35,7 @@ maj_commandes() {
   echo -e "${lime}➜ Mise à jour des commandes (magie, kali, guide, bureau, ia…)…${fin}"
   local tmp; tmp="$(mktemp -d)"
   local ok=1
-  for f in magie kali guide bureau ia magie-installer magie-update; do
+  for f in magie kali guide catalogue bureau ia magie-installer magie-update; do
     if curl -fsSL --max-time 15 "$DEPOT_RAW/bin/$f" -o "$tmp/$f"; then
       install -m 755 "$tmp/$f" "$PREFIX/bin/$f"
     else
@@ -43,7 +43,7 @@ maj_commandes() {
     fi
   done
   mkdir -p "$MAGIE/config"
-  for f in modeles.txt kali-outils.txt kali-guide.txt colors.properties \
+  for f in modeles.txt kali-outils.txt kali-guide.txt kali-catalogue.txt colors.properties \
            theme.bashrc avance.bashrc termux.properties kali-auto.bashrc; do
     curl -fsSL --max-time 15 "$DEPOT_RAW/config/$f" -o "$MAGIE/config/$f" 2>/dev/null || true
   done

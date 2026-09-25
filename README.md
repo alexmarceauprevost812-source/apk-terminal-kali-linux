@@ -160,6 +160,22 @@ Pour tout ajouter (l'ensemble d'outils standard), tapez `kali outils complet`
 > Utilisez les outils de sécurité uniquement sur vos propres appareils et réseaux,
 > ou avec une autorisation écrite.
 
+## 📚 Catalogue des outils (par catégorie)
+
+Comme sur <https://www.kali.org/tools/>, les outils sont **classés par catégorie**
+(Collecte d'informations, Applications web, Mots de passe, Sans fil, Exploitation,
+Forensique…). On parcourt, on lit ce que fait chaque outil, et on l'installe.
+
+```bash
+catalogue          # menu des catégories → choisir → installer
+catalogue web      # cherche « web » dans tout le catalogue
+catalogue installer nmap sqlmap   # installe directement
+```
+
+(aussi `kali catalogue` et l'option 2 du menu `magie`.) La liste est dans
+`config/kali-catalogue.txt`. Depuis une catégorie, tapez les numéros à installer,
+ou `g <outil>` pour ouvrir le guide.
+
 ## 📖 Guide des outils
 
 Chaque outil est expliqué : à quoi il sert, en une phrase simple, avec un exemple.
@@ -186,6 +202,11 @@ bureau arreter     # arrête le bureau
 
 Pour **voir** le bureau : installez une appli **VNC Viewer** (gratuite, Play Store),
 ouvrez-la et connectez-vous à **`localhost:1`** (mot de passe choisi à l'installation).
+
+**Icônes sur le bureau** (comme un ordinateur) : à l'installation, le bureau reçoit des
+icônes cliquables — **Terminal Kali**, **Catalogue outils**, **Guide des outils**,
+**Fichiers**, et **Navigateur Web** s'il est installé. Pour les recréer : `bureau icones`.
+Le bouton pour ouvrir le bureau est l'option 5 du menu `magie` (ou la commande `bureau`).
 
 **Fond d'écran :** un fond thématique (noir / vert lime) est appliqué automatiquement.
 Pour mettre **votre propre image** :
@@ -233,6 +254,7 @@ install.sh              installateur
 bin/magie               menu magique
 bin/kali                terminal Kali Linux (installation, mise à jour, auto)
 bin/guide               guide : ce que fait chaque outil Kali
+bin/catalogue           catalogue des outils par catégorie (installe)
 bin/bureau              bureau graphique XFCE (via VNC)
 bin/ia                  question rapide à l'IA
 bin/magie-installer     installation complète (depuis l'APK)
@@ -242,7 +264,9 @@ config/avance.bashrc    autocomplétion, fzf, zoxide, alias
 config/kali-auto.bashrc ouvre Kali à chaque nouvelle session
 config/kali-outils.txt  outils Kali installés automatiquement
 config/kali-guide.txt   guide (rôle + exemples) de chaque outil
+config/kali-catalogue.txt outils classés par catégorie (kali.org/tools)
 config/fond-ecran.png   fond d'écran par défaut du bureau
+apk/icone.png           (optionnel) icône de l'application
 apk/construire.sh       construit l'APK Terminal Magique
 apk/premier-demarrage.sh accueil au premier lancement de l'APK
 apk/zz-magie.sh         déclenche l'accueil (etc/profile.d)

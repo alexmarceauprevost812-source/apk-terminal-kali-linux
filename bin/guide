@@ -10,6 +10,8 @@ lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; gras='\033[1;97m'; jaune='\033
 
 trouver_fichier() {
   for f in "$PREFIX/share/magie/config/kali-guide.txt" \
+           "/usr/local/share/magie/config/kali-guide.txt" \
+           "$HOME/.magie/config/kali-guide.txt" \
            "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)/config/kali-guide.txt"; do
     [ -f "$f" ] && { echo "$f"; return 0; }
   done
