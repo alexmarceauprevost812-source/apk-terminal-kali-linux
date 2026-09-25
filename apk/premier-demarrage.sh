@@ -15,7 +15,8 @@ cat <<'TXT'
 
    Déjà prêt : thème noir / blanc / vert lime, touches Ctrl / Alt /
    Échap / Tab / flèches au-dessus du clavier, commandes « kali »
-   et « magie ».
+   et « magie ».  Tapez « apps » pour le BUREAU : choisir un outil
+   et copier sa commande, prête à coller dans le terminal.
 
    Étape suivante (Wi-Fi conseillé, ~1 Go) : installer Kali Linux
    (image officielle) AVEC ses outils déjà prêts — nmap, sqlmap,

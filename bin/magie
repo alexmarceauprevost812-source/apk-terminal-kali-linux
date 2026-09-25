@@ -199,6 +199,7 @@ aide() {
 🐉 magie — Terminal Kali Linux
 
   magie                  menu interactif
+  apps                   🖥  bureau : choisir un outil et copier sa commande
   kali                   entrer dans Kali Linux (aussi : magie linux)
   kali auto on|off       ouvrir Kali à chaque nouvelle session (ou non)
   kali outils            installer les outils Kali (nmap, sqlmap, hydra…)
@@ -236,6 +237,8 @@ menu() {
     echo -e "${rouge_vif}   ║${blanc}    🐉  ${orange}TERMINAL KALI LINUX${blanc}  🪄             ${rouge_vif}║${fin}"
     echo -e "${rouge_vif}   ╚══════════════════════════════════════════╝${fin}"
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
+    echo -e "   ${orange}a) 🖥  BUREAU — choisir un outil et copier sa commande${fin}"
+    echo
     echo "   1) 🐉 Entrer dans Kali Linux"
     echo "   2) 📚 Catalogue des outils (par catégorie)"
     echo "   3) 🧰 Installer les outils Kali de base"
@@ -256,6 +259,7 @@ menu() {
     echo
     read -rp "   Votre choix : " c
     case "$c" in
+      a|A|apps|bureau-texte) apps ;;
       1) linux ;;
       2) catalogue ;;
       3) outils_kali ;;
@@ -295,6 +299,7 @@ case "${1:-}" in
   stop) stop_ia ;;
   linux|kali) linux ;;
   outils) outils_kali ;;
+  apps|bureau-texte) shift; exec apps "$@" ;;
   guide) shift; exec guide "$@" ;;
   catalogue) shift; exec catalogue "$@" ;;
   bibliotheque|bibliothèque) shift; exec bibliotheque "$@" ;;

@@ -237,6 +237,34 @@ guide web        # cherche « web » dans les noms, catégories et résumés
 (aussi `kali guide` et l'option 3 du menu `magie`). La liste se modifie dans
 `config/kali-guide.txt`.
 
+## 🖥️ Bureau — choisir un outil et copier sa commande
+
+Un **bureau tactile** dans le terminal, façon écran d'ordinateur : au lieu de taper
+les commandes, on **choisit** un outil et sa commande se **copie toute seule**, prête à
+coller. On revient ensuite au terminal et on fait **appui long → « Coller »**.
+
+```bash
+apps             # ouvre le bureau (aussi : touche « a » du menu magie)
+```
+
+À l'ouverture, des « applications » s'affichent :
+
+- 📖 **Guide des outils** — chaque outil, ce qu'il fait, et ses commandes-exemples à copier
+- 🔎 **Ma bibliothèque** — les outils installés, classés par famille
+- 🧰 **Catalogue** — trouver et installer un outil
+- ⭐ **Commandes rapides** — les commandes les plus utiles (`kali`, `magie-update`, `bureau`…)
+
+On tape le numéro de l'app, puis celui de l'outil, puis celui de la commande : elle est
+copiée. La copie marche **sans Termux:API** (via la séquence terminal OSC 52), et aussi
+dans le bureau graphique (via `xclip`).
+
+Pour copier une commande directement sans passer par le bureau :
+
+```bash
+guide copier nmap      # copie la 1re commande-exemple de nmap
+guide copier nmap 2    # copie la 2e
+```
+
 ## 🧑‍💻 L'IA écrit et exécute la commande pour vous
 
 Pour un débutant qui ne sait pas encore taper la bonne commande : décrivez en français
@@ -326,8 +354,9 @@ Pour **voir** le bureau : installez une appli **VNC Viewer** (gratuite, Play Sto
 ouvrez-la et connectez-vous à **`localhost:1`** (mot de passe choisi à l'installation).
 
 **Icônes sur le bureau** (comme un ordinateur) : à l'installation, le bureau reçoit des
-icônes cliquables — **Terminal Kali**, **Catalogue outils**, **Guide des outils**,
-**Fichiers**, et **Navigateur Web** s'il est installé. Pour les recréer : `bureau icones`.
+icônes cliquables — **Applications** (ouvre le bureau `apps` : choisir un outil et copier
+sa commande), **Terminal Kali**, **Catalogue outils**, **Guide des outils**, **Fichiers**,
+et **Navigateur Web** s'il est installé. Pour les recréer : `bureau icones`.
 Le bouton pour ouvrir le bureau est l'option 5 du menu `magie` (ou la commande `bureau`).
 
 **Fond d'écran :** un fond thématique (noir / vert lime) est appliqué automatiquement.
@@ -382,6 +411,8 @@ bin/guide               guide : ce que fait chaque outil Kali
 bin/catalogue           catalogue des outils par catégorie (installe)
 bin/bibliotheque        mes outils installés, classés par famille
 bin/bureau              bureau graphique XFCE (via VNC)
+bin/apps                bureau tactile : choisir un outil et copier sa commande
+bin/copier              met une commande dans le presse-papier (OSC 52 / xclip)
 bin/ia                  question rapide à l'IA / « ia commande » (propose + exécute)
 bin/claude-code         installe et lance Claude Code (officiel Anthropic)
 bin/magie-installer     installation complète (depuis l'APK)

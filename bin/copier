@@ -1,0 +1,47 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# copier — met du texte dans le presse-papier (pour le coller ensuite dans le terminal).
+#   copier "ma commande"      → copie le texte donné
+#   echo "..." | copier        → copie ce qui arrive sur l'entrée
+# Fonctionne SANS Termux:API grâce à la séquence OSC 52 (gérée par le terminal).
+# Dans le bureau graphique (VNC/X), utilise aussi xclip/xsel si présents.
+set -uo pipefail
+
+# Récupère le texte : argument(s) ou entrée standard.
+if [ "$#" -gt 0 ]; then
+  texte="$*"
+else
+  texte="$(cat)"
+fi
+# Enlève un éventuel saut de ligne final (on colle une commande, pas un retour).
+texte="${texte%$'\n'}"
+
+copie=0
+
+# 1) OSC 52 : marche dans le terminal Android (Termux) sans aucun module.
+#    printf envoie  ESC ] 52 ; c ; <texte en base64> BEL
+if [ -n "$texte" ]; then
+  b64="$(printf '%s' "$texte" | base64 | tr -d '\n')"
+  # Vers le vrai terminal si possible (utile même quand on est dans un pipe).
+  if [ -w /dev/tty ]; then
+    printf '\033]52;c;%s\a' "$b64" > /dev/tty 2>/dev/null && copie=1
+  else
+    printf '\033]52;c;%s\a' "$b64" && copie=1
+  fi
+fi
+
+# 2) Bureau graphique (X/VNC) : xclip ou xsel remplissent le presse-papier X.
+if [ -n "${DISPLAY:-}" ]; then
+  if command -v xclip >/dev/null 2>&1; then
+    printf '%s' "$texte" | xclip -selection clipboard 2>/dev/null && copie=1
+  elif command -v xsel >/dev/null 2>&1; then
+    printf '%s' "$texte" | xsel --clipboard --input 2>/dev/null && copie=1
+  fi
+fi
+
+# 3) Repli : termux-clipboard-set, si jamais Termux:API est présent.
+if command -v termux-clipboard-set >/dev/null 2>&1; then
+  printf '%s' "$texte" | termux-clipboard-set 2>/dev/null && copie=1
+fi
+
+[ "$copie" -eq 1 ] && exit 0
+exit 1

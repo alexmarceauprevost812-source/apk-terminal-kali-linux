@@ -100,7 +100,8 @@ case "$cmd" in
       afficher_famille "$(echo $nom | sed 's/^ *//')" "$(echo $cats | sed 's/^ *//')"; total=$((total+NB))
     done < <(grep -vE '^\s*#|^\s*$' "$FAMILLES")
     afficher_autres
-    echo -e "\n${lime}✔ $total outils classés.${fin}  Détail : ${blanc}guide <nom>${fin}  ·  En ajouter : ${blanc}catalogue${fin}  ·  Manquants : ${blanc}bibliotheque manque${fin}" ;;
+    echo -e "\n${lime}✔ $total outils classés.${fin}  Détail : ${blanc}guide <nom>${fin}  ·  En ajouter : ${blanc}catalogue${fin}  ·  Manquants : ${blanc}bibliotheque manque${fin}"
+    echo -e "${blanc}💡 Bureau tactile (choisir + copier une commande) :  apps${fin}" ;;
   manque)
     echo -e "${lime}📚 Outils du catalogue pas encore installés${fin}"
     while IFS='|' read -r id nom cats; do

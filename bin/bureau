@@ -58,7 +58,7 @@ installer() {
     export DEBIAN_FRONTEND=noninteractive
     apt-get update &&
     apt-get install -y kali-desktop-xfce tigervnc-standalone-server dbus-x11 \
-      xfonts-base xfonts-100dpi xfonts-75dpi at-spi2-core kali-menu &&
+      xfonts-base xfonts-100dpi xfonts-75dpi at-spi2-core kali-menu xclip &&
     apt-get clean
   ' || { echo -e "${rouge}✖ Installation incomplète. Réessayez : bureau installer${fin}"; exit 1; }
 
@@ -102,9 +102,10 @@ XS
 installer_outils_bureau() {
   local base="$PREFIX/share/magie"
   [ -d "$base" ] || base="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)"
-  install -D -m 755 "$base/bin/guide"     "$ROOTFS/usr/local/bin/guide"     2>/dev/null || true
-  install -D -m 755 "$base/bin/catalogue" "$ROOTFS/usr/local/bin/catalogue" 2>/dev/null || true
-  for f in kali-guide.txt kali-catalogue.txt; do
+  for c in guide catalogue bibliotheque apps copier; do
+    install -D -m 755 "$base/bin/$c" "$ROOTFS/usr/local/bin/$c" 2>/dev/null || true
+  done
+  for f in kali-guide.txt kali-catalogue.txt kali-bibliotheque.txt kali-outils.txt; do
     install -D -m 644 "$base/config/$f" "$ROOTFS/usr/local/share/magie/config/$f" 2>/dev/null || true
   done
 }
@@ -128,10 +129,11 @@ D
       # Marque le lanceur comme fiable pour XFCE
       command -v gio >/dev/null 2>&1 && gio set "/root/Desktop/$1.desktop" metadata::xfce-exe-checksum "$(sha256sum "/root/Desktop/$1.desktop" | cut -d" " -f1)" 2>/dev/null || true
     }
-    ecrire 00-terminal  "Terminal Kali"     "xfce4-terminal"                                  utilities-terminal        true
-    ecrire 01-catalogue "Catalogue outils"  "xfce4-terminal --title=Catalogue -e catalogue"   system-software-install   true
-    ecrire 02-guide     "Guide des outils"  "xfce4-terminal --title=Guide -e \"bash -c \\\"guide | less -R\\\"\"" help-browser  true
-    ecrire 03-fichiers  "Fichiers"          "thunar"                                          system-file-manager       false
+    ecrire 00-applications "Applications"    "xfce4-terminal --title=Applications --geometry=100x34 -e apps" applications-other       true
+    ecrire 01-terminal  "Terminal Kali"     "xfce4-terminal"                                  utilities-terminal        true
+    ecrire 02-catalogue "Catalogue outils"  "xfce4-terminal --title=Catalogue -e catalogue"   system-software-install   true
+    ecrire 03-guide     "Guide des outils"  "xfce4-terminal --title=Guide -e \"bash -c \\\"guide | less -R\\\"\"" help-browser  true
+    ecrire 05-fichiers  "Fichiers"          "thunar"                                          system-file-manager       false
     command -v firefox        >/dev/null 2>&1 && ecrire 04-web "Navigateur Web" "firefox"        firefox-esr false
     command -v firefox-esr    >/dev/null 2>&1 && ecrire 04-web "Navigateur Web" "firefox-esr"    firefox-esr false
   ' 2>/dev/null || true

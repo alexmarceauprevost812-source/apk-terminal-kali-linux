@@ -3,6 +3,8 @@
 #   guide                → liste tous les outils avec un résumé
 #   guide nmap           → fiche détaillée d'un outil (rôle + exemples)
 #   guide web            → cherche « web » dans les noms, catégories et résumés
+#   guide copier nmap    → copie la 1re commande-exemple (prête à coller)
+#   guide copier nmap 2  → copie la 2e commande-exemple
 set -uo pipefail
 
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
@@ -27,7 +29,8 @@ lister() {
     res=$3; gsub(/^[ ]+/,"",res);
     printf "  \033[1;33m%-22s\033[0m \033[0;97m%-13s\033[0m %s\n", nom, "["cat"]", res
   }' "$FICHIER"
-  echo -e "\n${jaune}  ⚠️ À utiliser uniquement sur vos appareils/réseaux ou avec autorisation.${fin}"
+  echo -e "\n${blanc}  💡 Bureau tactile (choisir + copier une commande) :  apps${fin}"
+  echo -e "${jaune}  ⚠️ À utiliser uniquement sur vos appareils/réseaux ou avec autorisation.${fin}"
 }
 
 fiche() {
@@ -54,8 +57,29 @@ fiche() {
   fi
 }
 
+# Copie une commande-exemple d'un outil, prête à coller dans le terminal.
+copier_exemple() {
+  local outil="$1" rang="${2:-1}"
+  local cmd
+  cmd="$(awk -v cible="$outil" '
+    /^@/{ n=$0; sub(/^@[ ]*/,"",n); sub(/[ ]*\|.*/,"",n); gsub(/[ ]+$/,"",n);
+          aff=(tolower(n)==tolower(cible)) }
+    aff && /^\$/{ l=$0; sub(/^\$[ ]*/,"",l); sub(/[ ]+#.*/,"",l); print l }
+  ' "$FICHIER" | sed -n "${rang}p")"
+  if [ -z "$cmd" ]; then
+    echo -e "${jaune}Aucune commande-exemple n°$rang pour « $outil ».${fin}"; return 1
+  fi
+  echo -e "${lime}$cmd${fin}"
+  if command -v copier >/dev/null 2>&1 && copier "$cmd"; then
+    echo -e "${lime}✔ Copiée. Colle-la dans le terminal (appui long → Coller), puis Entrée.${fin}"
+  else
+    echo -e "${jaune}➜ Sélectionne et copie la ligne ci-dessus.${fin}"
+  fi
+}
+
 case "${1:-}" in
   ""|liste|list) lister ;;
-  -h|--help|aide) sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//' ;;
+  copier|copie|-c) shift; copier_exemple "$@" ;;
+  -h|--help|aide) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) fiche "$1" ;;
 esac

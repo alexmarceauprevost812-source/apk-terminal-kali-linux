@@ -1,0 +1,222 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# apps — le « bureau » du Terminal Magique : un écran façon ordinateur où l'on
+#        choisit un outil (bibliothèque + guide) et où la commande complète se
+#        COPIE toute seule, prête à coller dans le terminal (plus besoin de taper).
+#   apps            → ouvre le bureau
+#   apps guide      → ouvre directement le guide des outils
+#   apps biblio     → ouvre directement la bibliothèque
+#   apps catalogue  → ouvre directement le catalogue
+# Astuce : après avoir choisi une commande, reviens au terminal et fais un
+#          appui long → « Coller » (ou touche Coller du clavier), puis Entrée.
+set -uo pipefail
+
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; gras='\033[1;97m'
+cyan='\033[1;36m'; jaune='\033[1;33m'; gris='\033[0;90m'; rouge='\033[1;31m'; fin='\033[0m'
+
+# --- Où sont nos fichiers de données (selon Termux ou Kali) ---------------
+fichier() {
+  for d in "$PREFIX/share/magie/config" "/usr/local/share/magie/config" \
+           "$HOME/.magie/config" \
+           "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)/config"; do
+    [ -f "$d/$1" ] && { echo "$d/$1"; return 0; }
+  done
+  return 1
+}
+GUIDE="$(fichier kali-guide.txt || true)"
+CATALOGUE="$(fichier kali-catalogue.txt || true)"
+BIBLIO="$(fichier kali-bibliotheque.txt || true)"
+
+# La commande « copier » est-elle à côté de nous ?
+COPIER="$(command -v copier || true)"
+[ -z "$COPIER" ] && [ -x "$(dirname "$(readlink -f "$0")")/copier" ] && COPIER="$(dirname "$(readlink -f "$0")")/copier"
+
+pause() { echo; read -rp "$(printf "${gris}   ↵ Entrée pour revenir…${fin}")" _ || true; }
+titre() {
+  clear 2>/dev/null || printf '\033[2J\033[H'
+  echo -e "${lime}🖥  BUREAU — Terminal Magique${fin}   ${gris}$1${fin}"
+  echo -e "${gris}────────────────────────────────────────────${fin}"
+}
+
+# --- Cœur : copier une commande, prête à coller --------------------------
+copier_commande() {
+  local cmd="$1"
+  echo
+  echo -e "   ${blanc}Commande choisie :${fin}"
+  echo -e "   ${lime}$cmd${fin}"
+  echo
+  if [ -n "$COPIER" ] && "$COPIER" "$cmd" 2>/dev/null; then
+    echo -e "   ${lime}✔ Copiée dans le presse-papier !${fin}"
+    echo -e "   ${blanc}➜ Reviens au terminal, fais un appui long → « Coller », puis Entrée.${fin}"
+  else
+    echo -e "   ${jaune}➜ Sélectionne et copie la ligne verte ci-dessus, puis colle-la dans le terminal.${fin}"
+  fi
+}
+
+# Propose une liste de commandes numérotées ; l'utilisateur en choisit une à copier.
+#   $1 = titre affiché    (le reste = les commandes)
+choisir_commande() {
+  local sujet="$1"; shift
+  local -a cmds=("$@")
+  [ ${#cmds[@]} -eq 0 ] && { echo -e "   ${jaune}Aucune commande pour « $sujet ».${fin}"; pause; return; }
+  while true; do
+    titre "$sujet"
+    echo -e "   ${blanc}Choisis une commande à copier :${fin}\n"
+    local i=1 c
+    for c in "${cmds[@]}"; do
+      printf "   ${lime}%2d${fin}) %s\n" "$i" "$c"
+      i=$((i+1))
+    done
+    echo -e "\n   ${gris}Numéro à copier · Entrée = revenir${fin}"
+    read -rp "   > " rep || return
+    [ -z "$rep" ] && return
+    if [[ "$rep" =~ ^[0-9]+$ ]] && [ -n "${cmds[$((rep-1))]:-}" ]; then
+      copier_commande "${cmds[$((rep-1))]}"
+      pause
+    fi
+  done
+}
+
+# Extrait les commandes-exemples ($ ...) d'un outil dans le guide.
+commandes_de() {
+  local nom="$1"
+  [ -z "$GUIDE" ] && return
+  awk -v cible="$nom" '
+    /^@/{ n=$0; sub(/^@[ ]*/,"",n); sub(/[ ]*\|.*/,"",n); gsub(/[ ]+$/,"",n);
+          aff=(tolower(n)==tolower(cible)) }
+    aff && /^\$/{ l=$0; sub(/^\$[ ]*/,"",l); sub(/[ ]+#.*/,"",l); print l }
+  ' "$GUIDE"
+}
+
+# Le résumé (une ligne) d'un outil.
+resume_de() {
+  local nom="$1"; [ -z "$GUIDE" ] && return
+  awk -v cible="$nom" -F'|' '
+    /^@/{ n=$1; sub(/^@[ ]*/,"",n); gsub(/[ ]+$/,"",n);
+          if (tolower(n)==tolower(cible)) { r=$3; sub(/^[ ]+/,"",r); print r; exit } }
+  ' "$GUIDE"
+}
+
+# Écran d'un outil : son résumé, ses commandes à copier, + « installer ».
+ecran_outil() {
+  local nom="$1"
+  local -a cmds=()
+  local ligne
+  while IFS= read -r ligne; do [ -n "$ligne" ] && cmds+=("$ligne"); done < <(commandes_de "$nom")
+  # Toujours proposer l'installation (commande prête à coller dans le terminal).
+  cmds+=("catalogue installer $nom")
+  cmds+=("guide $nom")
+  local r; r="$(resume_de "$nom")"
+  choisir_commande "$nom${r:+ — $r}" "${cmds[@]}"
+}
+
+# --- App : Guide des outils ----------------------------------------------
+app_guide() {
+  [ -z "$GUIDE" ] && { echo -e "${rouge}Guide introuvable (lancez magie-update).${fin}"; pause; return; }
+  local -a noms=() res=()
+  local n r
+  while IFS='|' read -r n c r; do
+    n="$(echo "$n" | sed 's/^@[ ]*//; s/[ ]*$//')"
+    r="$(echo "$r" | sed 's/^[ ]*//')"
+    [ -n "$n" ] && { noms+=("$n"); res+=("$r"); }
+  done < <(grep '^@' "$GUIDE")
+  while true; do
+    titre "📖 Guide des outils"
+    echo -e "   ${blanc}Choisis un outil pour voir ses commandes :${fin}\n"
+    local i
+    for i in "${!noms[@]}"; do
+      printf "   ${lime}%2d${fin}) ${jaune}%-16s${fin} ${gris}%s${fin}\n" "$((i+1))" "${noms[$i]}" "${res[$i]}"
+    done
+    echo -e "\n   ${gris}Numéro · un mot pour chercher · Entrée = revenir${fin}"
+    read -rp "   > " rep || return
+    [ -z "$rep" ] && return
+    if [[ "$rep" =~ ^[0-9]+$ ]] && [ -n "${noms[$((rep-1))]:-}" ]; then
+      ecran_outil "${noms[$((rep-1))]}"
+    else
+      # Recherche : premier outil dont le nom/résumé contient le mot.
+      local trouve=""
+      for i in "${!noms[@]}"; do
+        if echo "${noms[$i]} ${res[$i]}" | grep -qi -- "$rep"; then trouve="${noms[$i]}"; break; fi
+      done
+      [ -n "$trouve" ] && ecran_outil "$trouve" \
+        || { echo -e "   ${jaune}Rien trouvé pour « $rep ».${fin}"; pause; }
+    fi
+  done
+}
+
+# --- App : Bibliothèque (familles d'outils) ------------------------------
+app_biblio() {
+  if command -v bibliotheque >/dev/null 2>&1; then
+    titre "🔎 Ma bibliothèque"
+    bibliotheque | ${PAGER:-less -R} 2>/dev/null || bibliotheque
+    pause
+  else
+    echo -e "${jaune}Commande « bibliotheque » indisponible.${fin}"; pause
+  fi
+}
+
+# --- App : Catalogue (installer) -----------------------------------------
+app_catalogue() {
+  if command -v catalogue >/dev/null 2>&1; then
+    titre "🧰 Catalogue — installer des outils"
+    echo -e "   ${gris}(le catalogue s'ouvre ; tape 'q' pour revenir au bureau)${fin}\n"
+    catalogue
+  else
+    echo -e "${jaune}Commande « catalogue » indisponible.${fin}"; pause
+  fi
+}
+
+# --- App : Commandes rapides (les plus utiles, prêtes à coller) ----------
+app_rapides() {
+  choisir_commande "⭐ Commandes rapides" \
+    "kali" \
+    "kali installer" \
+    "kali maj" \
+    "kali outils" \
+    "magie-update" \
+    "magie maj" \
+    "bureau" \
+    "bureau installer" \
+    "ia" \
+    "guide nmap" \
+    "nmap 192.168.1.0/24" \
+    "catalogue"
+}
+
+# --- Le bureau (écran d'accueil) -----------------------------------------
+bureau_accueil() {
+  while true; do
+    titre "choisis une application (tape son numéro)"
+    echo
+    echo -e "   📖 ${lime} 1${fin})  ${gras}Guide des outils${fin}      ${gris}ce que fait chaque outil + commandes${fin}"
+    echo -e "   🔎 ${lime} 2${fin})  ${gras}Ma bibliothèque${fin}       ${gris}mes outils installés, par famille${fin}"
+    echo -e "   🧰 ${lime} 3${fin})  ${gras}Catalogue${fin}             ${gris}trouver et installer un outil${fin}"
+    echo -e "   ⭐ ${lime} 4${fin})  ${gras}Commandes rapides${fin}     ${gris}les commandes les plus utiles à copier${fin}"
+    echo -e "   🐉 ${lime} 5${fin})  ${gras}Terminal Kali${fin}         ${gris}revenir au terminal${fin}"
+    echo
+    echo -e "   ${gris}0) Fermer le bureau${fin}"
+    echo -e "\n   ${blanc}💡 Choisis un outil → sa commande se copie → colle-la dans le terminal.${fin}"
+    read -rp "   > " c || { clear 2>/dev/null; return 0; }
+    case "$c" in
+      1) app_guide ;;
+      2) app_biblio ;;
+      3) app_catalogue ;;
+      4) app_rapides ;;
+      5|q|Q|quitter) titre "Terminal"; echo -e "   ${lime}➜ Te voilà de retour dans le terminal.${fin}\n"; return 0 ;;
+      0|exit) clear 2>/dev/null; return 0 ;;
+      "") ;;
+      *) : ;;
+    esac
+  done
+}
+
+case "${1:-}" in
+  ""|bureau) bureau_accueil ;;
+  guide) app_guide ;;
+  biblio|bibliotheque|bibliothèque) app_biblio ;;
+  catalogue) app_catalogue ;;
+  rapides) app_rapides ;;
+  -h|--help|aide) sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) # un nom d'outil direct
+     ecran_outil "$1" ;;
+esac

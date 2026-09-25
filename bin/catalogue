@@ -53,6 +53,7 @@ lister_categories() {
     i=$((i+1))
   done < <(categories)
   echo -e "\n  ${blanc}Tapez un numéro, un nom d'outil, ou 'q' pour quitter.${fin}"
+  echo -e "  ${blanc}💡 Bureau tactile (choisir + copier une commande) :  apps${fin}"
 }
 
 # Affiche les outils d'une catégorie et propose d'en installer
