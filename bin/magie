@@ -102,11 +102,8 @@ serveur_web() {
 stop_ia() { pkill -f "ollama serve" && echo "✔ Moteur d'IA arrêté" || echo "Le moteur n'était pas lancé"; }
 
 linux() {
-  if ! command -v proot-distro >/dev/null 2>&1; then
-    echo "✖ proot-distro absent. Relancez install.sh"; return 1
-  fi
-  echo -e "${violet}🐧 Entrée dans Debian — tapez 'exit' pour revenir${fin}"
-  proot-distro login debian --shared-tmp
+  echo -e "${vert}🐉 Entrée dans Kali Linux — tapez 'exit' pour revenir${fin}"
+  kali
 }
 
 infos() {
@@ -159,16 +156,17 @@ serveur_ssh() {
 
 mise_a_jour() {
   yes | pkg upgrade -y
-  command -v proot-distro >/dev/null 2>&1 && proot-distro login debian -- bash -c "apt update && apt upgrade -y" || true
+  command -v proot-distro >/dev/null 2>&1 && proot-distro login kali -- true >/dev/null 2>&1 && kali maj || true
   echo -e "${vert}✔ Tout est à jour${fin}"
 }
 
 aide() {
   cat <<EOF
-🐧 magie — Terminal Linux avancé
+🐉 magie — Terminal Kali Linux
 
   magie                  menu interactif
-  magie linux            entrer dans Debian (Linux complet, apt)
+  kali                   entrer dans Kali Linux (aussi : magie linux)
+  kali auto on|off       ouvrir Kali à chaque nouvelle session (ou non)
   magie raccourcis       touches spéciales et raccourcis
   magie ssh              se connecter au téléphone depuis un PC
   magie infos            infos du téléphone
@@ -193,11 +191,11 @@ menu() {
     echo -e "${violet}"
     cat <<'EOF'
    ╔══════════════════════════════════════════╗
-   ║    🐧  TERMINAL LINUX AVANCÉ  🪄           ║
+   ║    🐉  TERMINAL KALI LINUX  🪄             ║
    ╚══════════════════════════════════════════╝
 EOF
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
-    echo "   1) 🐧 Entrer dans Linux Debian"
+    echo "   1) 🐉 Entrer dans Kali Linux"
     echo "   2) ⌨  Raccourcis et touches spéciales"
     echo "   3) 🔐 Serveur SSH (accès depuis un PC)"
     echo "   4) 📱 Infos du téléphone"
@@ -237,7 +235,7 @@ case "${1:-}" in
   supprimer) supprimer ;;
   serveur) serveur_web ;;
   stop) stop_ia ;;
-  linux) linux ;;
+  linux|kali) linux ;;
   raccourcis) raccourcis ;;
   ssh) serveur_ssh ;;
   infos) infos ;;

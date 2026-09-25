@@ -1,0 +1,88 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# kali — ouvre le terminal Kali Linux (sans root, via proot-distro)
+#   kali                 → entrer dans Kali Linux (l'installe au premier lancement)
+#   kali installer       → (ré)installer Kali Linux
+#   kali maj             → mettre Kali à jour (apt full-upgrade)
+#   kali auto on|off     → ouvrir Kali automatiquement à chaque nouvelle session
+#   kali -- commande     → lancer une commande dans Kali
+set -uo pipefail
+
+NOM="kali"
+IMAGE="kalilinux/kali-rolling"   # image officielle Kali Linux (Docker Hub)
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+MAGIE="$PREFIX/share/magie"
+DOSSIER="$HOME/.magie"
+lime='\033[1;38;2;50;255;0m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
+
+kali_installe() {
+  command -v proot-distro >/dev/null 2>&1 && proot-distro login "$NOM" -- true >/dev/null 2>&1
+}
+
+fichier_theme() {
+  if [ -f "$MAGIE/config/theme.bashrc" ]; then
+    echo "$MAGIE/config/theme.bashrc"
+  else
+    echo "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)/config/theme.bashrc"
+  fi
+}
+
+installer() {
+  echo -e "${lime}🐉 Installation de Kali Linux (image officielle $IMAGE)${fin}"
+  echo -e "${jaune}   Wi-Fi conseillé : ~150 Mo à télécharger, puis la mise à jour de Kali.${fin}"
+  command -v proot-distro >/dev/null 2>&1 || pkg install -y proot-distro || return 1
+
+  if ! kali_installe; then
+    if ! proot-distro install --name "$NOM" "$IMAGE"; then
+      echo -e "${rouge}✖ Échec. Mettez à jour proot-distro puis réessayez :${fin}"
+      echo "   pkg upgrade -y proot-distro && kali installer"
+      return 1
+    fi
+  fi
+
+  echo -e "${lime}➜ Configuration de Kali (mise à jour, outils de base)…${fin}"
+  proot-distro login "$NOM" -- bash -c '
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update &&
+    apt-get install -y --no-install-recommends \
+      kali-linux-core sudo nano vim less bash-completion command-not-found \
+      man-db curl wget git ca-certificates iproute2 iputils-ping procps
+    apt-get clean
+  ' || echo -e "${jaune}➜ Configuration partielle : relancez « kali maj » plus tard.${fin}"
+
+  # Thème : fond noir, texte blanc, nom d'utilisateur vert lime
+  mkdir -p "$PREFIX/tmp"
+  cp "$(fichier_theme)" "$PREFIX/tmp/magie-theme.bashrc"
+  proot-distro login --shared-tmp "$NOM" -- bash -c '
+    grep -q "magie-theme" /root/.bashrc 2>/dev/null || { echo; cat /tmp/magie-theme.bashrc; } >> /root/.bashrc
+  '
+  rm -f "$PREFIX/tmp/magie-theme.bashrc"
+
+  mkdir -p "$DOSSIER"
+  touch "$DOSSIER/kali-auto"
+  echo -e "${lime}✔ Kali Linux est prêt. Il s'ouvrira à chaque nouvelle session.${fin}"
+  echo "   (pour revenir au terminal Android : « exit » ; désactiver : « kali auto off »)"
+}
+
+case "${1:-}" in
+  installer) installer ;;
+  maj)
+    kali_installe || installer || exit 1
+    proot-distro login "$NOM" -- bash -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y' ;;
+  auto)
+    mkdir -p "$DOSSIER"
+    case "${2:-}" in
+      on)  touch "$DOSSIER/kali-auto"; echo "✔ Kali s'ouvrira à chaque nouvelle session" ;;
+      off) rm -f "$DOSSIER/kali-auto"; echo "✔ Les nouvelles sessions restent dans le terminal Android" ;;
+      *)   echo "Usage : kali auto on|off"; exit 1 ;;
+    esac ;;
+  --)
+    shift
+    kali_installe || installer || exit 1
+    exec proot-distro login --shared-tmp "$NOM" -- "$@" ;;
+  "")
+    kali_installe || installer || exit 1
+    exec proot-distro login --shared-tmp "$NOM" ;;
+  -h|--help|aide)
+    sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) echo "Commande inconnue : $1 (voir « kali aide »)"; exit 1 ;;
+esac

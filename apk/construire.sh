@@ -2,7 +2,7 @@
 # ============================================================================
 #  Construit l'APK « Terminal Magique » à partir du code source de Termux.
 #  - nom de l'appli : Terminal Magique
-#  - couleurs par défaut : fond noir, texte vert lime, curseur blanc
+#  - couleurs par défaut : fond noir, texte blanc (le vert lime vient de l'invite)
 #  - les commandes magie / ia / magie-installer et le thème sont intégrés
 #    à l'environnement Linux de base (bootstrap) de l'APK
 #  Prérequis : Java 17, SDK Android (ANDROID_HOME), zip, git.
@@ -25,14 +25,14 @@ cd "$TRAVAIL/termux-app"
 git fetch -q --depth 1 "$TERMUX_DEPOT" "$TERMUX_COMMIT"
 git checkout -q FETCH_HEAD
 
-echo "==> 2. Personnalisation (nom, couleurs)"
+echo "==> 2. Personnalisation (nom)"
 sed -i "s|<string name=\"application_name\">&TERMUX_APP_NAME;</string>|<string name=\"application_name\">$NOM_APPLI</string>|" \
   app/src/main/res/values/strings.xml
 grep -q "<string name=\"application_name\">$NOM_APPLI</string>" app/src/main/res/values/strings.xml
 
-COULEURS=terminal-emulator/src/main/java/com/termux/terminal/TerminalColorScheme.java
-sed -i 's|^        0xffffffff, 0xff000000, 0xffffffff};|        0xff32ff00, 0xff000000, 0xffffffff}; // Terminal Magique : vert lime sur noir|' "$COULEURS"
-grep -q "0xff32ff00, 0xff000000, 0xffffffff}" "$COULEURS"
+# Couleurs par défaut de Termux déjà voulues : fond noir 0xff000000, texte blanc 0xffffffff
+grep -q "0xffffffff, 0xff000000, 0xffffffff};" \
+  terminal-emulator/src/main/java/com/termux/terminal/TerminalColorScheme.java
 
 export TERMUX_PACKAGE_VARIANT=apt-android-7
 export TERMUX_APP_VERSION_NAME="0.118.0+magie.$VERSION"

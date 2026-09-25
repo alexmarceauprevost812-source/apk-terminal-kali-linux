@@ -1,15 +1,17 @@
-# 🐧 Terminal Magique — un vrai terminal Linux avancé pour Android
+# 🐉 Terminal Magique — le vrai terminal Kali Linux sur une APK Android
 
-Une **APK** qui transforme le **Samsung Galaxy S25 Ultra** (et tout Android 7+ en ARM64)
-en vrai terminal Linux avancé, **sans root**. Des IA gratuites hors-ligne sont disponibles en option.
+Une **APK** qui met un vrai **Kali Linux** dans le **Samsung Galaxy S25 Ultra**
+(et tout Android 7+ en ARM64), **sans root**. Kali s'ouvre directement au lancement de l'appli.
+Des IA gratuites hors-ligne sont disponibles en option.
 
-- 🐧 **Vrai Linux** : bash, gestionnaire de paquets `pkg`/`apt` (des milliers de logiciels),
-  et **Debian complet** via `proot-distro`
+- 🐉 **Vrai Kali Linux** : l'image officielle `kalilinux/kali-rolling`, avec `apt` et tous les
+  paquets des dépôts Kali, installée via `proot-distro`
+- 🐧 **Terminal Android** en plus : bash et `pkg` (des milliers de logiciels)
 - ⌨ **Terminal avancé** : barre de touches Ctrl / Alt / Échap / Tab / flèches, plusieurs sessions,
   autocomplétion, recherche floue dans l'historique (fzf), tmux, serveur SSH
 - 🧰 **Outils installés** : neovim, vim, micro, nano, git, ssh, rsync, python, nodejs, clang,
   make, cmake, ripgrep, fd, bat, eza, zoxide, btop, htop, jq, nmap, dnsutils…
-- 🎨 **Thème noir** : fond noir, texte vert lime, **ce que vous tapez en blanc**
+- 🎨 **Thème** : fond **noir**, écriture **blanche**, nom d'utilisateur **vert lime**
 - 🤖 **IA gratuites (option)** : Llama 3.2, Gemma 3, Qwen, Phi-4, DeepSeek R1, Mistral… via Ollama
 
 ---
@@ -21,8 +23,16 @@ en vrai terminal Linux avancé, **sans root**. Des IA gratuites hors-ligne sont 
 2. Téléchargez **`terminal-magique-…-arm64-v8a.apk`** (pour le S25 Ultra).
 3. Ouvrez le fichier et autorisez « Installer des applis inconnues » si Android le demande.
 4. Lancez **Terminal Magique** : le thème, la barre de touches spéciales et les commandes
-   `magie` sont déjà dedans. L'appli propose ensuite d'installer les outils du terminal
-   avancé et Debian (~1 Go, Wi-Fi conseillé), puis, **en option**, le moteur d'IA.
+   `kali` et `magie` sont déjà dedans. L'appli propose ensuite d'installer **Kali Linux**
+   et les outils du terminal avancé (~1 Go, Wi-Fi conseillé), puis, **en option**, le moteur d'IA.
+5. Ensuite, **chaque nouvelle session ouvre directement Kali Linux** :
+
+   ```
+   ┌──(root㉿kali)-[~]
+   └─# apt install <paquet>
+   ```
+
+   `exit` revient au terminal Android ; `kali auto off` désactive l'ouverture automatique.
 
 > ⚠️ L'APK est basée sur Termux (même nom de paquet `com.termux`) :
 > **désinstallez Termux s'il est déjà installé** avant d'installer Terminal Magique.
@@ -30,12 +40,13 @@ en vrai terminal Linux avancé, **sans root**. Des IA gratuites hors-ligne sont 
 > Les modules Termux:API / Termux:Widget de F-Droid ne sont pas compatibles avec cette APK
 > (signature différente).
 
-Si vous refusez l'installation au premier lancement, tapez plus tard `magie-installer`.
+Si vous refusez l'installation au premier lancement, tapez plus tard `magie-installer`
+(ou seulement `kali` pour installer Kali).
 
 ### Comment l'APK est construite
 
 `apk/construire.sh` télécharge le code source officiel de Termux (version figée),
-change le nom de l'appli et les couleurs par défaut, ajoute nos scripts dans
+change le nom de l'appli, ajoute nos scripts dans
 l'environnement Linux de base, puis compile l'APK. Le workflow GitHub Actions
 `.github/workflows/apk.yml` le lance à chaque modification de la branche `main`
 et publie les APK dans **Releases** (on peut aussi le lancer à la main depuis l'onglet Actions).
@@ -51,9 +62,9 @@ pkg install -y git && git clone https://github.com/alexmarceauprevost812-source/
 ```
 
 L'installateur met Termux à jour, installe les outils Linux (git, python, nodejs, clang,
-vim, htop, tmux…), donne accès aux fichiers du téléphone, installe **Ollama** et **Debian**,
-applique le thème et installe les commandes `magie` et `ia`.
-Options : `--no-debian` (sans Debian), `--sans-ia` (sans le moteur d'IA).
+vim, htop, tmux…), donne accès aux fichiers du téléphone, installe **Kali Linux** et **Ollama**,
+applique le thème et installe les commandes `kali`, `magie` et `ia`.
+Options : `--sans-kali` (sans Kali), `--sans-ia` (sans le moteur d'IA).
 
 ## 3. (Option) Télécharger une IA gratuite
 
@@ -85,7 +96,7 @@ modèle de <https://ollama.com/library>.
 | Historique | `Ctrl+R` (recherche floue fzf) |
 | Aller dans un dossier | `z nom` (zoxide) |
 | Éditer un fichier | `nvim`, `micro` ou `nano` |
-| Installer un logiciel | `pkg install nom` (Termux) ou `apt install nom` (dans Debian) |
+| Installer un logiciel | `apt install nom` (dans Kali) ou `pkg install nom` (terminal Android) |
 | Accès depuis un PC | `magie ssh` puis `ssh -p 8022 …` depuis le PC |
 | Aide-mémoire | `magie raccourcis` |
 
@@ -95,7 +106,7 @@ Réglages : `config/termux.properties` (copié dans `~/.termux/`) et `config/ava
 
 ```bash
 magie                         # menu interactif
-magie linux                   # entrer dans Debian (apt install …)
+kali                          # entrer dans Kali Linux
 magie ssh                     # serveur SSH pour se connecter depuis un PC
 ia                            # discussion avec l'IA (/bye pour quitter)
 ia "Explique-moi Linux"       # réponse rapide
@@ -108,18 +119,38 @@ magie aide                    # toutes les commandes
 `magie serveur` permet aussi d'utiliser vos IA dans des applis Android graphiques
 compatibles Ollama.
 
+## 🐉 Kali Linux
+
+| Commande | Effet |
+|----------|-------|
+| `kali` | entrer dans Kali Linux (l'installe au premier lancement) |
+| `exit` | revenir au terminal Android |
+| `kali maj` | mettre Kali à jour (`apt full-upgrade`) |
+| `kali auto on` / `kali auto off` | ouvrir (ou non) Kali à chaque nouvelle session |
+| `kali -- commande` | lancer une commande dans Kali depuis Android |
+| `kali installer` | (ré)installer Kali |
+
+Kali est installé à partir de l'image Docker officielle `kalilinux/kali-rolling`,
+avec le paquet de base `kali-linux-core`. Les outils Kali s'installent ensuite avec `apt`,
+par exemple `apt install kali-linux-headless` pour l'ensemble d'outils standard.
+
+> ℹ️ Sans root, Kali tourne dans `proot` : certaines fonctions qui exigent le noyau ou la
+> carte Wi-Fi (mode moniteur, scans réseau bruts) ne sont pas disponibles.
+> Utilisez les outils de sécurité uniquement sur vos propres appareils et réseaux,
+> ou avec une autorisation écrite.
+
 ## 🎨 Thème
 
 | Élément                     | Couleur          |
 |-----------------------------|------------------|
 | Fond                        | noir `#000000`   |
-| Texte / résultats           | vert lime `#32FF00` |
-| Ce que vous tapez           | blanc            |
+| Écriture                    | blanc `#FFFFFF`  |
+| Nom d'utilisateur (`root㉿kali`) et `$` / `#` | vert lime `#32FF00` |
 | Curseur                     | blanc            |
 
-Fichiers : `config/colors.properties` (couleurs Termux, copiées dans `~/.termux/`)
-et `config/theme.bashrc` (invite de commande). L'ancien thème est sauvegardé dans
-`~/.termux/colors.properties.bak`.
+Fichiers : `config/colors.properties` (couleurs du terminal, copiées dans `~/.termux/`)
+et `config/theme.bashrc` (invite de commande style Kali, appliquée dans Kali et dans Android).
+L'ancien thème est sauvegardé dans `~/.termux/colors.properties.bak`.
 
 ## Pourquoi les IA ne sont pas « dans l'APK » ?
 
@@ -132,15 +163,17 @@ et restent ensuite **100 % hors-ligne** sur le téléphone.
 ```
 install.sh              installateur
 bin/magie               menu magique
+bin/kali                terminal Kali Linux (installation, mise à jour, auto)
 bin/ia                  question rapide à l'IA
 bin/magie-installer     installation complète (depuis l'APK)
 config/termux.properties barre de touches, raccourcis, historique
 config/avance.bashrc    autocomplétion, fzf, zoxide, alias
+config/kali-auto.bashrc ouvre Kali à chaque nouvelle session
 apk/construire.sh       construit l'APK Terminal Magique
 apk/premier-demarrage.sh accueil au premier lancement de l'APK
 apk/zz-magie.sh         déclenche l'accueil (etc/profile.d)
 .github/workflows/apk.yml compilation automatique + Releases
 config/modeles.txt      liste des IA gratuites proposées
-config/colors.properties thème Termux noir / vert lime
-config/theme.bashrc     invite : saisie blanche, sorties vert lime
+config/colors.properties thème : fond noir, écriture blanche
+config/theme.bashrc     invite style Kali, nom d'utilisateur vert lime
 ```

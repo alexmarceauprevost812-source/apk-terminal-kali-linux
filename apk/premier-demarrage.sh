@@ -6,23 +6,24 @@ MAGIE="/data/data/com.termux/files/usr/share/magie"
 bash "$MAGIE/install.sh" --config-seulement >/dev/null 2>&1
 termux-reload-settings >/dev/null 2>&1
 
-printf '\033[1;32m'
+printf '\033[1;38;2;50;255;0m'
 cat <<'TXT'
 
    ╔══════════════════════════════════════════════╗
-   ║     🐧  TERMINAL LINUX AVANCÉ — BIENVENUE      ║
+   ║      🐉  TERMINAL KALI LINUX — BIENVENUE       ║
    ╚══════════════════════════════════════════════╝
 
-   Déjà prêt : thème noir / vert lime, touches Ctrl / Alt / Échap /
-   Tab / flèches au-dessus du clavier, commandes « magie ».
+   Déjà prêt : thème noir / blanc / vert lime, touches Ctrl / Alt /
+   Échap / Tab / flèches au-dessus du clavier, commandes « kali »
+   et « magie ».
 
-   Étape suivante (Wi-Fi conseillé, ~1 Go) : installer les outils
-   d'un terminal avancé — tmux, neovim, git, ssh, python, nodejs,
-   clang, fzf, ripgrep, btop, nmap… — et Linux Debian complet.
+   Étape suivante (Wi-Fi conseillé, ~1 Go) : installer Kali Linux
+   (image officielle) et les outils du terminal avancé — tmux,
+   neovim, git, ssh, python, nodejs, clang, fzf, ripgrep, btop…
 
 TXT
 printf '\033[0m'
-read -rp "   Installer le terminal avancé maintenant ? (O/n) " rep
+read -rp "   Installer Kali Linux maintenant ? (O/n) " rep
 case "$rep" in
   n|N|non|NON)
     echo "   Plus tard, tapez :  magie-installer"
@@ -36,4 +37,4 @@ case "$ia" in
      echo "   Pour ajouter l'IA plus tard :  pkg install ollama && magie installer-ia" ;;
 esac
 echo
-echo -e "\033[1;32m   Fermez et rouvrez l'appli (ou tapez « exit ») pour tout activer.\033[0m"
+echo -e "\033[1;38;2;50;255;0m   Fermez et rouvrez l'appli : Kali Linux s'ouvrira directement.\033[0m"

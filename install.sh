@@ -1,10 +1,10 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # ============================================================================
 #  Terminal Linux Magique — installateur pour Termux (Samsung Galaxy S25 Ultra)
-#  Installe : terminal Linux avancé (outils, éditeurs, réseau, dev), Debian complet
-#             (proot) et, en option, des IA locales gratuites (Ollama)
+#  Installe : terminal Linux avancé (outils, éditeurs, réseau, dev), Kali Linux
+#             (proot, image officielle) et, en option, des IA locales gratuites (Ollama)
 #  Usage :  bash install.sh            (installation complète)
-#           bash install.sh --no-debian (sans la distribution Debian)
+#           bash install.sh --sans-kali (sans Kali Linux)
 #           bash install.sh --sans-ia   (sans le moteur d'IA)
 #           bash install.sh --config-seulement (thème + commandes, sans téléchargement)
 # ============================================================================
@@ -12,12 +12,12 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
-INSTALL_DEBIAN=1
+INSTALL_KALI=1
 INSTALL_IA=1
 CONFIG_SEULEMENT=0
 for arg in "$@"; do
   case "$arg" in
-    --no-debian) INSTALL_DEBIAN=0 ;;
+    --sans-kali|--no-debian) INSTALL_KALI=0 ;;
     --sans-ia) INSTALL_IA=0 ;;
     --config-seulement) CONFIG_SEULEMENT=1 ;;
   esac
@@ -48,8 +48,8 @@ if [ "$CONFIG_SEULEMENT" -eq 0 ]; then
 cat <<'EOF'
 
    ╔══════════════════════════════════════════════╗
-   ║   🪄  TERMINAL LINUX MAGIQUE  +  IA GRATUITES  ║
-   ║        Samsung Galaxy S25 Ultra · Termux     ║
+   ║   🐉  TERMINAL KALI LINUX  ·  TERMINAL MAGIQUE  ║
+   ║        Samsung Galaxy S25 Ultra · sans root     ║
    ╚══════════════════════════════════════════════╝
 
 EOF
@@ -92,20 +92,19 @@ else
   etape "4/6 Moteur d'IA ignoré (--sans-ia)"
 fi
 
-if [ "$INSTALL_DEBIAN" -eq 1 ]; then
-  etape "5/6 Installation de Debian (Linux complet, sans root)"
-  if proot-distro list 2>/dev/null | grep -q "debian.*installed\|Installed.*debian"; then
-    ok "Debian déjà installé"
+if [ "$INSTALL_KALI" -eq 1 ]; then
+  etape "5/6 Installation de Kali Linux (sans root)"
+  if bash "$REPO_DIR/bin/kali" installer; then
+    ok "Kali Linux prêt :  tapez  kali"
   else
-    proot-distro install debian || info "Debian déjà présent ou installation ignorée"
+    info "Kali non installé pour le moment. Réessayez avec :  kali installer"
   fi
-  ok "Lancez Debian avec :  magie linux"
 else
-  etape "5/6 Debian ignoré (--no-debian)"
+  etape "5/6 Kali Linux ignoré (--sans-kali)"
 fi
 fi # fin des étapes 1 à 5 (sautées avec --config-seulement)
 
-etape "6/6 Thème noir / vert lime, touches spéciales et commandes"
+etape "6/6 Thème (noir, blanc, vert lime), touches spéciales et commandes"
 mkdir -p "$HOME/.termux"
 for fichier in colors.properties termux.properties; do
   if [ -f "$HOME/.termux/$fichier" ] && ! cmp -s "$HOME/.termux/$fichier" "$REPO_DIR/config/$fichier"; then
@@ -118,10 +117,6 @@ if ! grep -q "magie-avance" "$HOME/.bashrc" 2>/dev/null; then
 fi
 if ! grep -q "magie-theme" "$HOME/.bashrc" 2>/dev/null; then
   { echo; cat "$REPO_DIR/config/theme.bashrc"; } >> "$HOME/.bashrc"
-fi
-DEBIAN_BASHRC="$PREFIX/var/lib/proot-distro/installed-rootfs/debian/root/.bashrc"
-if [ -f "$DEBIAN_BASHRC" ] && ! grep -q "magie-theme" "$DEBIAN_BASHRC"; then
-  { echo; cat "$REPO_DIR/config/theme.bashrc"; } >> "$DEBIAN_BASHRC"
 fi
 termux-reload-settings 2>/dev/null || true
 ok "Thème, barre de touches spéciales et raccourcis appliqués"
@@ -137,10 +132,13 @@ if ! grep -q "magie-bienvenue" "$HOME/.bashrc" 2>/dev/null; then
 
 # magie-bienvenue : message d'accueil du Terminal Linux Magique
 command -v fastfetch >/dev/null 2>&1 && fastfetch --logo small 2>/dev/null
-echo -e "\033[1;32m🐧 Terminal Linux avancé — tapez 'magie' pour le menu ('magie aide' pour tout voir)\033[0m"
+echo -e "\033[1;38;2;50;255;0m🐉 Tapez 'kali' pour Kali Linux, 'magie' pour le menu\033[0m"
 EOF
 fi
-ok "Commandes installées : magie, ia, magie-installer"
+if ! grep -q "magie-kali-auto" "$HOME/.bashrc" 2>/dev/null; then
+  { echo; cat "$REPO_DIR/config/kali-auto.bashrc"; } >> "$HOME/.bashrc"
+fi
+ok "Commandes installées : kali, magie, ia, magie-installer"
 
 [ "$CONFIG_SEULEMENT" -eq 1 ] && exit 0
 
@@ -148,8 +146,9 @@ cat <<EOF
 
 $(printf "${vert}")🎉 Installation terminée !$(printf "${fin}")
 
-  magie                 → menu (Linux, outils, IA)
-  magie linux           → entrer dans Debian (apt install …)
+  kali                  → terminal Kali Linux (s'ouvre aussi tout seul)
+  exit                  → revenir au terminal Android
+  magie                 → menu (Kali, outils, IA)
   tmux                  → plusieurs fenêtres dans un terminal
   nvim, micro, nano     → éditeurs de texte
   Ctrl+R                → recherche dans l'historique (fzf)
