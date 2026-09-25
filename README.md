@@ -173,6 +173,17 @@ bureau arreter     # arrête le bureau
 Pour **voir** le bureau : installez une appli **VNC Viewer** (gratuite, Play Store),
 ouvrez-la et connectez-vous à **`localhost:1`** (mot de passe choisi à l'installation).
 
+**Fond d'écran :** un fond thématique (noir / vert lime) est appliqué automatiquement.
+Pour mettre **votre propre image** :
+
+```bash
+bureau fond ~/storage/dcim/ma-photo.jpg   # une photo du téléphone
+bureau fond                               # revenir au fond par défaut
+```
+
+(Vos photos sont dans `~/storage/dcim` ou `~/storage/downloads`. Le fond se met à jour
+tout de suite si le bureau tourne, sinon au prochain démarrage.)
+
 > 💡 Un écran de téléphone reste petit pour un bureau : c'est plus confortable en
 > connectant le téléphone à un écran (DeX sur le S25 Ultra) ou en affichant depuis un PC.
 
@@ -216,6 +227,7 @@ config/avance.bashrc    autocomplétion, fzf, zoxide, alias
 config/kali-auto.bashrc ouvre Kali à chaque nouvelle session
 config/kali-outils.txt  outils Kali installés automatiquement
 config/kali-guide.txt   guide (rôle + exemples) de chaque outil
+config/fond-ecran.png   fond d'écran par défaut du bureau
 apk/construire.sh       construit l'APK Terminal Magique
 apk/premier-demarrage.sh accueil au premier lancement de l'APK
 apk/zz-magie.sh         déclenche l'accueil (etc/profile.d)

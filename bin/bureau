@@ -2,6 +2,7 @@
 # bureau — un vrai bureau graphique Kali (XFCE) dans le téléphone, via VNC.
 #   bureau installer     → installe le bureau XFCE + le serveur d'affichage dans Kali
 #   bureau               → démarre le bureau et explique comment l'afficher
+#   bureau fond [image]  → change le fond d'écran (défaut, ou votre photo)
 #   bureau arreter       → arrête le bureau
 # Pour VOIR le bureau : installez une appli « VNC Viewer » sur Android
 # et connectez-vous à  localhost:1  (mot de passe défini à l'installation).
@@ -9,9 +10,39 @@ set -uo pipefail
 
 NOM="kali"
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+ROOTFS="$PREFIX/var/lib/proot-distro/installed-rootfs/$NOM"
 lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
 
 dans_kali() { proot-distro login "$NOM" -- "$@"; }
+
+fichier_fond_defaut() {
+  for f in "$PREFIX/share/magie/config/fond-ecran.png" \
+           "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)/config/fond-ecran.png"; do
+    [ -f "$f" ] && { echo "$f"; return 0; }
+  done
+  return 1
+}
+
+# Copie une image dans Kali et l'applique comme fond d'écran XFCE.
+appliquer_fond() {
+  local source="$1"
+  [ -f "$source" ] || { echo -e "${rouge}✖ Image introuvable : $source${fin}"; return 1; }
+  install -D -m 644 "$source" "$ROOTFS/root/.magie-fond.png" 2>/dev/null \
+    || dans_kali bash -c 'cat > /root/.magie-fond.png' < "$source"
+  # Applique tout de suite si le bureau tourne, et à chaque démarrage (xstartup s'en charge).
+  dans_kali bash -c '
+    export DISPLAY=:1
+    if command -v xfconf-query >/dev/null 2>&1; then
+      for p in $(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E "last-image$"); do
+        xfconf-query -c xfce4-desktop -p "$p" -s /root/.magie-fond.png 2>/dev/null
+      done
+      # Valeurs par défaut pour les futurs écrans/espaces de travail
+      xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitorVNC-0/workspace0/last-image \
+        -n -t string -s /root/.magie-fond.png 2>/dev/null
+      command -v xfdesktop >/dev/null 2>&1 && xfdesktop --reload 2>/dev/null
+    fi
+  ' 2>/dev/null || true
+}
 
 verifier_kali() {
   if ! command -v proot-distro >/dev/null 2>&1 || ! proot-distro login "$NOM" -- true >/dev/null 2>&1; then
@@ -39,12 +70,43 @@ installer() {
 unset SESSION_MANAGER DBUS_SESSION_BUS_ADDRESS
 export XDG_RUNTIME_DIR=/tmp/runtime-root
 [ -x /usr/bin/dbus-launch ] && eval "\$(dbus-launch --sh-syntax)"
+# Applique le fond une fois XFCE demarre
+( sleep 4
+  if [ -f /root/.magie-fond.png ]; then
+    for p in \$(xfconf-query -c xfce4-desktop -l 2>/dev/null | grep -E "last-image\$"); do
+      xfconf-query -c xfce4-desktop -p "\$p" -s /root/.magie-fond.png 2>/dev/null
+    done
+    xfdesktop --reload 2>/dev/null
+  fi ) &
 exec startxfce4
 XS
     chmod +x ~/.vnc/xstartup
   '
-  echo -e "${lime}✔ Bureau installé. Lancez-le avec :  bureau${fin}"
-  echo -e "   Installez une appli ${gras:-}VNC Viewer${fin} sur Android (Play Store, gratuit)."
+  # Fond d'écran par défaut (thème noir / vert lime)
+  local defaut; defaut="$(fichier_fond_defaut || true)"
+  [ -n "$defaut" ] && appliquer_fond "$defaut"
+  echo -e "${lime}✔ Bureau installé (avec fond d'écran). Lancez-le avec :  bureau${fin}"
+  echo -e "   Installez une appli VNC Viewer sur Android (Play Store, gratuit)."
+  echo -e "   Pour mettre votre photo en fond :  bureau fond /chemin/vers/image.jpg"
+}
+
+fond() {
+  verifier_kali
+  local source="${1:-}"
+  if [ -z "$source" ]; then
+    source="$(fichier_fond_defaut || true)"
+    [ -z "$source" ] && { echo -e "${rouge}✖ Fond par défaut introuvable.${fin}"; exit 1; }
+    echo -e "${lime}➜ Fond d'écran par défaut (thème Kali)…${fin}"
+  else
+    # Chemins pratiques : ~/storage/... pour les photos du téléphone
+    case "$source" in
+      "~/"*) source="$HOME/${source#\~/}" ;;
+    esac
+    [ -f "$source" ] || { echo -e "${rouge}✖ Image introuvable : $source${fin}"
+      echo "   Astuce : vos photos sont dans  ~/storage/dcim  ou  ~/storage/downloads"; exit 1; }
+    echo -e "${lime}➜ Fond d'écran : $source${fin}"
+  fi
+  appliquer_fond "$source" && echo -e "${lime}✔ Fond appliqué. (Si le bureau tourne, il se met à jour ; sinon au prochain démarrage.)${fin}"
 }
 
 demarrer() {
@@ -81,8 +143,9 @@ arreter() {
 
 case "${1:-}" in
   installer) installer ;;
+  fond) fond "${2:-}" ;;
   arreter|stop) arreter ;;
   ""|demarrer|start) demarrer ;;
-  -h|--help|aide) sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' ;;
-  *) echo "Usage : bureau [installer|arreter]"; exit 1 ;;
+  -h|--help|aide) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) echo "Usage : bureau [installer|fond|arreter]"; exit 1 ;;
 esac
