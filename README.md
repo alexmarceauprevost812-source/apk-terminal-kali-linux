@@ -1,8 +1,10 @@
 # 🐉 Terminal Magique — le vrai terminal Kali Linux sur une APK Android
 
-Une **APK** qui met un vrai **Kali Linux** dans le **Samsung Galaxy S25 Ultra**
-(et tout Android 7+ en ARM64), **sans root**. Kali s'ouvre directement au lancement de l'appli.
-Des IA gratuites hors-ligne sont disponibles en option.
+Une **APK** qui met un vrai **Kali Linux** dans **n'importe quel téléphone Android 7+ en
+ARM64** — Galaxy S25 Ultra, Galaxy A17, et la grande majorité des téléphones Android
+récents —, **sans root**. Même APK, aucune version différente selon le modèle.
+Kali s'ouvre directement au lancement de l'appli. Des IA gratuites hors-ligne sont
+disponibles en option.
 
 - 🐉 **Vrai Kali Linux** : l'image officielle `kalilinux/kali-rolling`, installée via `proot-distro`,
   **avec ses outils déjà prêts** (nmap, sqlmap, hydra, nikto, john, metasploit…)
@@ -20,7 +22,8 @@ Des IA gratuites hors-ligne sont disponibles en option.
 
 1. Sur le téléphone, ouvrez la page **Releases** du dépôt :
    <https://github.com/alexmarceauprevost812-source/apk-terminal-kali-linux/releases/latest>
-2. Téléchargez **`terminal-magique-…-arm64-v8a.apk`** (pour le S25 Ultra).
+2. Téléchargez **`terminal-magique-…-arm64-v8a.apk`** (fonctionne sur tout téléphone
+   Android récent : Galaxy S25 Ultra, Galaxy A17, etc. — même fichier pour tous).
 3. Ouvrez le fichier et autorisez « Installer des applis inconnues » si Android le demande.
 4. Lancez **Terminal Magique** : le thème, la barre de touches spéciales et les commandes
    `kali` et `magie` sont déjà dedans. L'appli propose ensuite d'installer **Kali Linux**
@@ -103,8 +106,15 @@ Autres IA disponibles avec `magie modeles` : `qwen2.5:3b`, `phi4-mini`,
 `deepseek-r1:1.5b`, `moondream` (photos), `mistral:7b`… ou n'importe quel
 modèle de <https://ollama.com/library>.
 
-> 💡 Le S25 Ultra (12 Go de RAM) fait tourner confortablement les modèles de 1 à 4 milliards
-> de paramètres, et jusqu'à 7-8 milliards plus lentement.
+> 💡 La bonne taille d'IA dépend de la **RAM du téléphone** :
+> - **6 Go et moins** (ex. Galaxy A17) : préférez le pack **Mini** (`llama3.2:1b`) ou
+>   **Léger** (`llama3.2:3b`) — évitez les modèles de 7-8 milliards, trop lents ou
+>   susceptibles de faire fermer l'appli (mémoire insuffisante).
+> - **8-12 Go et plus** (ex. Galaxy S25 Ultra) : le pack **Léger** tourne bien, et les
+>   modèles jusqu'à 7-8 milliards restent utilisables (plus lents).
+>
+> Voir la RAM de votre téléphone : Réglages → À propos du téléphone → Mémoire (RAM),
+> ou `magie infos` dans le terminal.
 
 ## 4. Le terminal avancé
 
@@ -332,7 +342,10 @@ bureau fond                               # revenir au fond par défaut
 tout de suite si le bureau tourne, sinon au prochain démarrage.)
 
 > 💡 Un écran de téléphone reste petit pour un bureau : c'est plus confortable en
-> connectant le téléphone à un écran (DeX sur le S25 Ultra) ou en affichant depuis un PC.
+> connectant le téléphone à un écran (DeX, sur les modèles Samsung qui le supportent —
+> pas tous, l'A17 n'a pas DeX) ou en affichant depuis un PC (voir la section VNC ci-dessus).
+> Sur un téléphone avec peu de RAM (6 Go ou moins), le bureau graphique peut être lent :
+> le terminal reste le meilleur choix au quotidien.
 
 ## 🎨 Thème
 

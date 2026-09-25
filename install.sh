@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # ============================================================================
-#  Terminal Linux Magique — installateur pour Termux (Samsung Galaxy S25 Ultra)
+#  Terminal Linux Magique — installateur pour Termux (tout Android 7+ ARM64)
 #  Installe : terminal Linux avancé (outils, éditeurs, réseau, dev), Kali Linux
 #             (proot, image officielle) et, en option, des IA locales gratuites (Ollama)
 #  Usage :  bash install.sh            (installation complète)
@@ -49,7 +49,7 @@ cat <<'EOF'
 
    ╔══════════════════════════════════════════════╗
    ║   🐉  TERMINAL KALI LINUX  ·  TERMINAL MAGIQUE  ║
-   ║        Samsung Galaxy S25 Ultra · sans root     ║
+   ║              Android · sans root                ║
    ╚══════════════════════════════════════════════╝
 
 EOF
