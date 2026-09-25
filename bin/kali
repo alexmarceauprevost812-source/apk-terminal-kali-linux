@@ -3,6 +3,7 @@
 #   kali                 → entrer dans Kali Linux (l'installe au premier lancement)
 #   kali installer       → (ré)installer Kali Linux
 #   kali maj             → mettre Kali à jour (apt full-upgrade)
+#   kali diagnostic      → vérifie proot-distro, Internet, espace disque
 #   kali outils          → (ré)installer les outils Kali de base
 #   kali outils complet  → installer TOUS les outils (kali-linux-headless)
 #   kali guide [outil]   → guide : ce que fait chaque outil (+ exemples)
@@ -33,6 +34,20 @@ fichier_config() {
 }
 fichier_theme() { fichier_config theme.bashrc; }
 
+# Affiche l'état du système pour comprendre un échec d'installation.
+diagnostic() {
+  echo -e "${blanc}• proot-distro :${fin} $(command -v proot-distro >/dev/null 2>&1 && proot-distro --version 2>/dev/null | head -n1 || echo 'ABSENT')"
+  local libre; libre="$(df -h "$HOME" 2>/dev/null | awk 'NR==2{print $4}')"
+  echo -e "${blanc}• Espace libre :${fin} ${libre:-inconnu}"
+  if curl -fsI --max-time 8 https://registry-1.docker.io/v2/ >/dev/null 2>&1 \
+     || curl -fsI --max-time 8 https://auth.docker.io >/dev/null 2>&1; then
+    echo -e "${blanc}• Internet (Docker Hub) :${fin} OK"
+  else
+    echo -e "${blanc}• Internet (Docker Hub) :${fin} ${rouge}injoignable${fin} (Wi-Fi ? données mobiles ?)"
+  fi
+  echo -e "${blanc}• Kali déjà installé :${fin} $(kali_installe && echo oui || echo non)"
+}
+
 # Installe les outils Kali (liste par défaut, ou le métapaquet complet).
 installer_outils() {
   kali_installe || { echo -e "${rouge}✖ Installez d'abord Kali : kali installer${fin}"; return 1; }
@@ -57,12 +72,30 @@ installer_outils() {
 installer() {
   echo -e "${lime}🐉 Installation de Kali Linux (image officielle $IMAGE)${fin}"
   echo -e "${jaune}   Wi-Fi conseillé : ~150 Mo à télécharger, puis la mise à jour de Kali.${fin}"
-  command -v proot-distro >/dev/null 2>&1 || pkg install -y proot-distro || return 1
+
+  # 1) proot-distro présent ET à jour (l'installation depuis une image Docker
+  #    n'existe que dans les versions récentes de proot-distro).
+  echo -e "${lime}➜ Vérification de proot-distro…${fin}"
+  pkg install -y proot-distro >/dev/null 2>&1 || true
+  yes | pkg upgrade -y proot-distro >/dev/null 2>&1 || true
+  if ! command -v proot-distro >/dev/null 2>&1; then
+    echo -e "${rouge}✖ proot-distro n'est pas installé. Lancez : pkg install proot-distro${fin}"
+    return 1
+  fi
 
   if ! kali_installe; then
+    echo -e "${lime}➜ Téléchargement de Kali (l'erreur éventuelle s'affiche en dessous)…${fin}"
     if ! proot-distro install --name "$NOM" "$IMAGE"; then
-      echo -e "${rouge}✖ Échec. Mettez à jour proot-distro puis réessayez :${fin}"
-      echo "   pkg upgrade -y proot-distro && kali installer"
+      echo
+      echo -e "${rouge}✖ Le téléchargement de Kali a échoué.${fin}"
+      echo -e "${jaune}Diagnostic :${fin}"
+      diagnostic
+      echo
+      echo -e "Solutions à essayer :"
+      echo -e "  1) Mettez tout à jour :   ${blanc}pkg update && pkg upgrade -y${fin}"
+      echo -e "  2) Réessayez :            ${blanc}kali installer${fin}"
+      echo -e "  3) Si « unknown distribution » : votre proot-distro est trop ancien,"
+      echo -e "     mettez à jour Termux (F-Droid) puis  ${blanc}pkg upgrade proot-distro${fin}"
       return 1
     fi
   fi
@@ -99,6 +132,7 @@ case "${1:-}" in
     kali_installe || installer || exit 1
     proot-distro login "$NOM" -- bash -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y' ;;
   outils) installer_outils "${2:-}" ;;
+  diagnostic|diag) diagnostic ;;
   guide) shift; exec guide "$@" ;;
   catalogue) shift; exec catalogue "$@" ;;
   bureau) shift; exec bureau "$@" ;;
@@ -117,6 +151,6 @@ case "${1:-}" in
     kali_installe || installer || exit 1
     exec proot-distro login --shared-tmp "$NOM" ;;
   -h|--help|aide)
-    sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+    sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) echo "Commande inconnue : $1 (voir « kali aide »)"; exit 1 ;;
 esac
