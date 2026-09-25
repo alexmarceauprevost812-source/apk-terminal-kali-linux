@@ -196,6 +196,27 @@ guide web        # cherche « web » dans les noms, catégories et résumés
 (aussi `kali guide` et l'option 3 du menu `magie`). La liste se modifie dans
 `config/kali-guide.txt`.
 
+## 🧑‍💻 L'IA écrit et exécute la commande pour vous
+
+Pour un débutant qui ne sait pas encore taper la bonne commande : décrivez en français
+ce que vous voulez faire, l'IA propose **une seule commande** avec une explication,
+et **rien ne s'exécute sans votre accord**.
+
+```bash
+ia commande "trouve les appareils connectés sur mon wifi"
+ia commande "installe nmap"
+ia commande "montre-moi l'espace disque restant"
+```
+
+(aussi `magie commande "..."` et l'option 12 du menu `magie`.) La commande proposée
+s'affiche en **bleu ciel**, avec un `(O/n)` pour confirmer. Si la commande semble
+risquée (effacer des fichiers, formater…), une confirmation renforcée est demandée
+(il faut taper le mot « oui » en entier). Si vous répondez « n » ou appuyez sur
+Entrée, rien n'est exécuté.
+
+> 💡 Ça marche aussi pour apprendre à utiliser un outil déjà téléchargé :
+> `ia commande "comment scanner mon réseau avec nmap"` explique et propose la commande.
+
 ## 🖥️ Bureau graphique (comme un ordinateur)
 
 L'APK peut afficher un **vrai bureau Kali (XFCE)** — barre des tâches, menu, fenêtres —

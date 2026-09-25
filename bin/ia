@@ -1,10 +1,15 @@
 #!/data/data/com.termux/files/usr/bin/bash
 # ia — pose une question à l'IA locale (Ollama), ou ouvre une discussion.
-#   ia                      → discussion interactive
-#   ia "question"           → réponse unique
-#   ia -m gemma3:4b "..."   → choisir le modèle
+#   ia                        → discussion interactive
+#   ia "question"             → réponse unique
+#   ia -m gemma3:4b "..."     → choisir le modèle
 #   cat fichier | ia "résume ce texte"
+#   ia commande "ce que je veux faire"   → l'IA propose UNE commande, vous
+#                                           confirmez, elle l'exécute pour vous
 set -euo pipefail
+
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
+ciel='\033[1;38;2;135;206;235m'   # bleu ciel : aide de l'IA sur les commandes (ia commande)
 
 CONF="$HOME/.magie/modele_actif"
 MODELE="$(cat "$CONF" 2>/dev/null || echo llama3.2:3b)"
@@ -27,16 +32,98 @@ demarrer_serveur() {
   fi
 }
 
-demarrer_serveur
+verifier_modele() {
+  local installes
+  installes="$(ollama list 2>/dev/null | awk 'NR>1{print $1}')"
+  if ! grep -qFx -e "$MODELE" -e "$MODELE:latest" <<<"$installes"; then
+    echo "🪄 Le modèle '$MODELE' n'est pas encore téléchargé. Téléchargement…"
+    ollama pull "$MODELE"
+  fi
+}
 
-INSTALLES="$(ollama list 2>/dev/null | awk 'NR>1{print $1}')"
-if ! grep -qFx -e "$MODELE" -e "$MODELE:latest" <<<"$INSTALLES"; then
-  echo "🪄 Le modèle '$MODELE' n'est pas encore téléchargé. Téléchargement…"
-  ollama pull "$MODELE"
+# Motifs dangereux : on prévient toujours plus fort avant d'exécuter ce genre de commande.
+est_dangereuse() {
+  grep -qEi '(^|[;&|]|\s)(rm\s+-[a-z]*r[a-z]*f|rm\s+-[a-z]*f[a-z]*r|mkfs|dd\s+if=|> ?/dev/sd|:\(\)\s*\{|chmod\s+-R\s+777\s+/|chown\s+-R.*\s+/($|\s)|shutdown|reboot|>\s*/dev/null\s*2>&1\s*&\s*$)' <<<"$1"
+}
+
+# ---------------------------------------------------------------------------
+# ia commande "ce que je veux faire" — l'IA propose une commande, on confirme.
+# ---------------------------------------------------------------------------
+commande_ia() {
+  local demande="$*"
+  if [ -z "$demande" ]; then
+    read -rp "Que voulez-vous faire ? " demande
+  fi
+  [ -z "$demande" ] && { echo "Rien à faire."; return 1; }
+
+  demarrer_serveur
+  verifier_modele
+
+  local dans_kali="non"
+  grep -qi '^ID=kali' /etc/os-release 2>/dev/null && dans_kali="oui (Kali Linux, apt)"
+
+  local prompt
+  prompt="Tu es un assistant de terminal Linux sur Android (Termux/Kali, sans root). Système : $(uname -s 2>/dev/null). Dans Kali : $dans_kali.
+L'utilisateur est débutant et décrit en français ce qu'il veut faire : « $demande ».
+Réponds STRICTEMENT dans ce format, sans rien ajouter avant ni après :
+COMMANDE: <une seule commande shell, sur une seule ligne, prête à exécuter>
+EXPLICATION: <une ou deux phrases en français, simples, qui expliquent ce que fait la commande>
+Si la demande n'est pas une tâche de terminal, ou si aucune commande sûre n'existe, réponds :
+COMMANDE: (aucune)
+EXPLICATION: <pourquoi, en français>"
+
+  echo -e "${ciel}🤖 Réflexion…${fin}"
+  local reponse
+  reponse="$(ollama run "$MODELE" "$prompt" 2>/dev/null)"
+
+  local cmd expl
+  cmd="$(printf '%s\n' "$reponse" | grep -m1 -i '^COMMANDE:' | sed -E 's/^[Cc][Oo][Mm][Mm][Aa][Nn][Dd][Ee]:[ ]*//')"
+  expl="$(printf '%s\n' "$reponse" | grep -m1 -i '^EXPLICATION:' | sed -E 's/^[Ee][Xx][Pp][Ll][Ii][Cc][Aa][Tt][Ii][Oo][Nn]:[ ]*//')"
+  # Retire d'éventuels ``` ou guillemets autour de la commande
+  cmd="$(sed -E "s/^[\`'\"]+//; s/[\`'\"]+\$//" <<<"$cmd")"
+
+  if [ -z "$cmd" ]; then
+    echo -e "${ciel}➜ Cette IA n'a pas proposé de commande claire. Voici sa réponse :${fin}"
+    echo -e "${ciel}$reponse${fin}"
+    return 0
+  fi
+  if [ "$cmd" = "(aucune)" ] || [ -z "${cmd//[()]/}" ]; then
+    local texte="${expl:-Cette IA ne propose pas de commande pour cette demande.}"
+    echo -e "${ciel}➜ ${texte}${fin}"
+    return 0
+  fi
+
+  echo
+  echo -e "${ciel}Commande proposée :${fin}"
+  echo -e "  ${blanc}\$ $cmd${fin}"
+  [ -n "$expl" ] && echo -e "${ciel}➜ $expl${fin}"
+  echo
+
+  if est_dangereuse "$cmd"; then
+    echo -e "${rouge}⚠️  Cette commande peut être risquée (elle peut effacer ou modifier des données).${fin}"
+    read -rp "Tapez EXACTEMENT « oui » pour l'exécuter quand même, ou Entrée pour annuler : " rep
+    [ "$rep" = "oui" ] || { echo "Annulé."; return 0; }
+  else
+    read -rp "Exécuter cette commande ? (O/n) " rep
+    case "$rep" in n|N|non|NON) echo "Annulé."; return 0 ;; esac
+  fi
+
+  echo -e "${lime}➜ Exécution…${fin}"
+  eval "$cmd"
+}
+
+if [ "${1:-}" = "commande" ] || [ "${1:-}" = "cmd" ]; then
+  shift
+  commande_ia "$@"
+  exit $?
 fi
+
+demarrer_serveur
+verifier_modele
 
 if [ $# -eq 0 ] && [ -t 0 ]; then
   echo -e "\033[1;35m🤖 Discussion avec $MODELE — tapez /bye pour quitter\033[0m"
+  echo -e "${jaune}➜ Pour qu'elle exécute une commande pour vous : ia commande \"ce que je veux faire\"${fin}"
   exec ollama run "$MODELE"
 fi
 
