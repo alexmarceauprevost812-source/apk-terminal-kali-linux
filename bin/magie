@@ -10,7 +10,7 @@ ACTIF="$DOSSIER/modele_actif"
 mkdir -p "$DOSSIER"
 
 violet='\033[1;35m'; cyan='\033[1;36m'; vert='\033[1;32m'; jaune='\033[1;33m'; fin='\033[0m'
-rouge='\033[1;31m'; orange='\033[1;38;2;255;140;0m'; blanc='\033[0;97m'
+rouge='\033[1;31m'; rouge_vif='\033[1;38;2;255;20;20m'; orange='\033[1;38;2;255;140;0m'; blanc='\033[0;97m'
 
 modele_actif() { cat "$ACTIF" 2>/dev/null || echo "llama3.2:3b"; }
 
@@ -231,9 +231,9 @@ EOF
 menu() {
   while true; do
     clear
-    echo -e "${rouge}   ╔══════════════════════════════════════════╗${fin}"
-    echo -e "${rouge}   ║${blanc}    🐉  ${orange}TERMINAL KALI LINUX${blanc}  🪄             ${rouge}║${fin}"
-    echo -e "${rouge}   ╚══════════════════════════════════════════╝${fin}"
+    echo -e "${rouge_vif}   ╔══════════════════════════════════════════╗${fin}"
+    echo -e "${rouge_vif}   ║${blanc}    🐉  ${orange}TERMINAL KALI LINUX${blanc}  🪄             ${rouge_vif}║${fin}"
+    echo -e "${rouge_vif}   ╚══════════════════════════════════════════╝${fin}"
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
     echo "   1) 🐉 Entrer dans Kali Linux"
     echo "   2) 📚 Catalogue des outils (par catégorie)"
