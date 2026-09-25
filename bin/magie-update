@@ -6,9 +6,9 @@
 #   magie-update --check    → vérifie seulement (silencieux si à jour)
 set -uo pipefail
 
-DEPOT_RAW="https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-linux-/main"
-DEPOT_API="https://api.github.com/repos/alexmarceauprevost812-source/apk-terminal-linux-/releases/latest"
-RELEASES="https://github.com/alexmarceauprevost812-source/apk-terminal-linux-/releases/latest"
+DEPOT_RAW="https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-kali-linux/main"
+DEPOT_API="https://api.github.com/repos/alexmarceauprevost812-source/apk-terminal-kali-linux/releases/latest"
+RELEASES="https://github.com/alexmarceauprevost812-source/apk-terminal-kali-linux/releases/latest"
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
 MAGIE="$PREFIX/share/magie"
 DOSSIER="$HOME/.magie"
@@ -58,9 +58,9 @@ verifier_apk() {
   local locale distante; locale="$(version_installee)"; distante="$(version_distante)"
   [ -z "$distante" ] && return 2
   if plus_recent "$locale" "$distante"; then
-    echo -e "${jaune}⭳ Nouvelle version de l'application disponible : ${blanc}v$distante${fin} (installée : v$locale)"
-    echo -e "   Téléchargez la nouvelle APK ici :"
-    echo -e "   ${blanc}$RELEASES${fin}"
+    echo -e "${jaune}⭳ Une mise à jour est disponible : ${blanc}v$distante${fin}${jaune} (vous avez v$locale).${fin}"
+    echo -e "   ${lime}➜ Tapez  magie-update  pour l'appliquer${fin} (garde Kali, les outils et l'IA)."
+    echo -e "   Une réinstallation de l'APK n'est nécessaire que si magie-update le demande."
     return 0
   fi
   return 1
@@ -71,11 +71,19 @@ case "${1:-}" in
     # Silencieux si à jour ; sert au message d'accueil.
     verifier_apk || true ;;
   *)
+    echo -e "${lime}🔄 Mise à jour (vos données restées intactes : Kali, outils, IA)…${fin}"
     maj_commandes
     echo
-    if ! verifier_apk; then
-      echo -e "${lime}✔ Application à jour (v$(version_installee)).${fin}"
+    if verifier_apk; then
+      # Une version plus récente existe : les commandes viennent d'être mises à jour.
+      echo
+      echo -e "${lime}✔ Corrections appliquées sans rien réinstaller.${fin}"
+      echo -e "   Si un problème persiste et que magie-update indique qu'une nouvelle APK"
+      echo -e "   est nécessaire, installez-la par-dessus l'ancienne : Kali, les outils et"
+      echo -e "   l'IA sont conservés (ils ne sont pas dans l'APK)."
+    else
+      echo -e "${lime}✔ Tout est à jour (v$(version_installee)).${fin}"
     fi
     echo
-    echo -e "Pensez aussi à mettre à jour Kali :  ${blanc}kali maj${fin}" ;;
+    echo -e "Pour mettre à jour Kali lui-même :  ${blanc}kali maj${fin}" ;;
 esac

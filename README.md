@@ -19,7 +19,7 @@ Des IA gratuites hors-ligne sont disponibles en option.
 ## 1. Installer l'APK « Terminal Magique » (recommandé)
 
 1. Sur le téléphone, ouvrez la page **Releases** du dépôt :
-   <https://github.com/alexmarceauprevost812-source/apk-terminal-linux-/releases/latest>
+   <https://github.com/alexmarceauprevost812-source/apk-terminal-kali-linux/releases/latest>
 2. Téléchargez **`terminal-magique-…-arm64-v8a.apk`** (pour le S25 Ultra).
 3. Ouvrez le fichier et autorisez « Installer des applis inconnues » si Android le demande.
 4. Lancez **Terminal Magique** : le thème, la barre de touches spéciales et les commandes
@@ -51,19 +51,26 @@ l'environnement Linux de base, puis compile l'APK. Le workflow GitHub Actions
 `.github/workflows/apk.yml` le lance à chaque modification de la branche `main`
 et publie les APK dans **Releases** (on peut aussi le lancer à la main depuis l'onglet Actions).
 
-### Mises à jour
+### Mises à jour (sans tout retélécharger)
 
-L'application **suit les mises à jour** toute seule :
+Vos données — **Kali Linux, les outils installés et l'IA** — ne sont **pas** dans l'APK :
+elles vivent dans l'espace de l'application. On peut donc corriger les bugs **sans rien
+perdre et sans tout recommencer**.
 
-- à chaque ouverture, elle vérifie sur GitHub s'il existe une
-  **nouvelle APK** et affiche le lien de téléchargement si c'est le cas ;
-- `magie-update` met à jour les **commandes** (`magie`, `kali`, `guide`, `bureau`, `ia`…)
-  et les fichiers de configuration directement depuis GitHub, sans réinstaller l'APK ;
-- `magie maj` fait tout : paquets Termux, commandes de l'app, et Kali (`kali maj`).
+- **`magie-update`** : corrige et met à jour les **commandes** (`magie`, `kali`, `guide`,
+  `catalogue`, `bureau`, `ia`…) directement depuis GitHub. **Kali, les outils et l'IA sont
+  conservés.** C'est la façon normale de recevoir les corrections — pas besoin de réinstaller.
+- **`magie maj`** : fait tout — paquets Termux, commandes de l'app, puis Kali (`kali maj`).
+- À chaque ouverture, l'app vérifie s'il existe une version plus récente et propose
+  `magie-update`.
 
-Le numéro de version installé est dans `share/magie/VERSION`. Une nouvelle APK n'est
-nécessaire que pour les changements de l'application elle-même ; le reste se met à jour
-avec `magie-update`.
+**Mettre à jour l'APK elle-même** (rare : seulement pour un changement de l'application,
+comme l'icône) : téléchargez la nouvelle APK et **installez-la PAR-DESSUS l'ancienne**.
+⚠️ **Ne désinstallez pas** l'application avant : désinstaller efface Kali, les outils et
+l'IA. Installer par-dessus garde tout. (On ne désinstalle Termux qu'une seule fois, avant
+le tout premier install, s'il est déjà présent.)
+
+Le numéro de version installé est dans `share/magie/VERSION`.
 
 ## 2. Autre méthode : Termux + script
 
@@ -72,7 +79,7 @@ Si vous préférez l'appli Termux officielle
 [GitHub](https://github.com/termux/termux-app/releases), pas le Play Store), ouvrez-la et collez :
 
 ```bash
-pkg install -y git && git clone https://github.com/alexmarceauprevost812-source/apk-terminal-linux-.git && cd apk-terminal-linux- && bash install.sh
+pkg install -y git && git clone https://github.com/alexmarceauprevost812-source/apk-terminal-kali-linux.git && cd apk-terminal-kali-linux && bash install.sh
 ```
 
 L'installateur met Termux à jour, installe les outils Linux (git, python, nodejs, clang,

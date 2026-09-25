@@ -42,7 +42,7 @@ Write-Host "  Une fenetre Kali va s'ouvrir et vous demander de creer" -Foregroun
 Write-Host "  un nom d'utilisateur et un mot de passe. Faites-le," -ForegroundColor Green
 Write-Host "  puis DANS la fenetre Kali, collez cette seule ligne :" -ForegroundColor Green
 Write-Host ""
-Write-Host '    wget -qO- https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-linux-/main/windows/configurer-kali.sh | bash' -ForegroundColor Cyan
+Write-Host '    wget -qO- https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-kali-linux/main/windows/configurer-kali.sh | bash' -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Elle installe les outils Kali et le theme (noir / blanc /" -ForegroundColor Green
 Write-Host "  nom d'utilisateur vert lime). Fermez puis rouvrez Kali ensuite." -ForegroundColor Green

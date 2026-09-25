@@ -9,12 +9,12 @@ qui fait tourner un **vrai Kali Linux** dans Windows — les mêmes outils, en p
 2. Collez :
    ```powershell
    Set-ExecutionPolicy -Scope Process Bypass -Force
-   irm https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-linux-/main/windows/installer-kali-windows.ps1 | iex
+   irm https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-kali-linux/main/windows/installer-kali-windows.ps1 | iex
    ```
 3. Suivez les indications à l'écran. Kali vous demandera de créer un nom d'utilisateur
    et un mot de passe, puis vous collerez **dans la fenêtre Kali** :
    ```bash
-   wget -qO- https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-linux-/main/windows/configurer-kali.sh | bash
+   wget -qO- https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-kali-linux/main/windows/configurer-kali.sh | bash
    ```
    Cela installe les outils Kali et le thème (noir / blanc / nom d'utilisateur vert lime).
 4. Fermez puis rouvrez Kali.

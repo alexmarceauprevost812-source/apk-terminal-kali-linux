@@ -5,7 +5,7 @@
 set -uo pipefail
 
 lime='\033[1;38;2;50;255;0m'; jaune='\033[1;33m'; fin='\033[0m'
-DEPOT="https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-linux-/main"
+DEPOT="https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-kali-linux/main"
 
 if ! grep -qi '^ID=kali' /etc/os-release 2>/dev/null; then
   echo "Ce script est prévu pour Kali Linux (WSL). Ouvrez Kali puis relancez-le."
