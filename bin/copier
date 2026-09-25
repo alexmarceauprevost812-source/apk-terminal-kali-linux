@@ -22,10 +22,10 @@ copie=0
 if [ -n "$texte" ]; then
   b64="$(printf '%s' "$texte" | base64 | tr -d '\n')"
   # Vers le vrai terminal si possible (utile même quand on est dans un pipe).
-  if [ -w /dev/tty ]; then
-    printf '\033]52;c;%s\a' "$b64" > /dev/tty 2>/dev/null && copie=1
-  else
-    printf '\033]52;c;%s\a' "$b64" && copie=1
+  if { printf '\033]52;c;%s\a' "$b64" > /dev/tty; } 2>/dev/null; then
+    copie=1
+  elif printf '\033]52;c;%s\a' "$b64" 2>/dev/null; then
+    copie=1
   fi
 fi
 
