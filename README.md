@@ -4,8 +4,8 @@ Une **APK** qui met un vrai **Kali Linux** dans le **Samsung Galaxy S25 Ultra**
 (et tout Android 7+ en ARM64), **sans root**. Kali s'ouvre directement au lancement de l'appli.
 Des IA gratuites hors-ligne sont disponibles en option.
 
-- 🐉 **Vrai Kali Linux** : l'image officielle `kalilinux/kali-rolling`, avec `apt` et tous les
-  paquets des dépôts Kali, installée via `proot-distro`
+- 🐉 **Vrai Kali Linux** : l'image officielle `kalilinux/kali-rolling`, installée via `proot-distro`,
+  **avec ses outils déjà prêts** (nmap, sqlmap, hydra, nikto, john, metasploit…)
 - 🐧 **Terminal Android** en plus : bash et `pkg` (des milliers de logiciels)
 - ⌨ **Terminal avancé** : barre de touches Ctrl / Alt / Échap / Tab / flèches, plusieurs sessions,
   autocomplétion, recherche floue dans l'historique (fzf), tmux, serveur SSH
@@ -126,13 +126,20 @@ compatibles Ollama.
 | `kali` | entrer dans Kali Linux (l'installe au premier lancement) |
 | `exit` | revenir au terminal Android |
 | `kali maj` | mettre Kali à jour (`apt full-upgrade`) |
+| `kali outils` | (ré)installer les outils Kali de base |
+| `kali outils complet` | installer **tous** les outils (`kali-linux-headless`, plusieurs Go) |
 | `kali auto on` / `kali auto off` | ouvrir (ou non) Kali à chaque nouvelle session |
 | `kali -- commande` | lancer une commande dans Kali depuis Android |
 | `kali installer` | (ré)installer Kali |
 
-Kali est installé à partir de l'image Docker officielle `kalilinux/kali-rolling`,
-avec le paquet de base `kali-linux-core`. Les outils Kali s'installent ensuite avec `apt`,
-par exemple `apt install kali-linux-headless` pour l'ensemble d'outils standard.
+Kali est installé à partir de l'image Docker officielle `kalilinux/kali-rolling`.
+Dès la première installation, **une sélection d'outils est installée automatiquement**
+(voir `config/kali-outils.txt`) : `nmap`, `sqlmap`, `hydra`, `nikto`, `whatweb`, `dirb`,
+`wpscan`, `john`, `hashcat`, `metasploit-framework`, etc. Ils sont donc déjà prêts
+à la première ouverture de Kali.
+
+Pour tout ajouter (l'ensemble d'outils standard), tapez `kali outils complet`
+(métapaquet `kali-linux-headless`).
 
 > ℹ️ Sans root, Kali tourne dans `proot` : certaines fonctions qui exigent le noyau ou la
 > carte Wi-Fi (mode moniteur, scans réseau bruts) ne sont pas disponibles.
@@ -169,6 +176,7 @@ bin/magie-installer     installation complète (depuis l'APK)
 config/termux.properties barre de touches, raccourcis, historique
 config/avance.bashrc    autocomplétion, fzf, zoxide, alias
 config/kali-auto.bashrc ouvre Kali à chaque nouvelle session
+config/kali-outils.txt  outils Kali installés automatiquement
 apk/construire.sh       construit l'APK Terminal Magique
 apk/premier-demarrage.sh accueil au premier lancement de l'APK
 apk/zz-magie.sh         déclenche l'accueil (etc/profile.d)

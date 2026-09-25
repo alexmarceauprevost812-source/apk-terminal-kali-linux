@@ -106,6 +106,17 @@ linux() {
   kali
 }
 
+outils_kali() {
+  echo -e "${cyan}🧰 Outils Kali${fin}"
+  echo "   1) De base : nmap, sqlmap, hydra, nikto, john, metasploit… (recommandé)"
+  echo "   2) Complet : tous les outils (kali-linux-headless, plusieurs Go)"
+  read -rp "   Votre choix [1] : " c
+  case "${c:-1}" in
+    2) kali outils complet ;;
+    *) kali outils ;;
+  esac
+}
+
 infos() {
   command -v fastfetch >/dev/null 2>&1 && fastfetch || uname -a
   echo
@@ -167,6 +178,7 @@ aide() {
   magie                  menu interactif
   kali                   entrer dans Kali Linux (aussi : magie linux)
   kali auto on|off       ouvrir Kali à chaque nouvelle session (ou non)
+  kali outils            installer les outils Kali (nmap, sqlmap, hydra…)
   magie raccourcis       touches spéciales et raccourcis
   magie ssh              se connecter au téléphone depuis un PC
   magie infos            infos du téléphone
@@ -196,28 +208,30 @@ menu() {
 EOF
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
     echo "   1) 🐉 Entrer dans Kali Linux"
-    echo "   2) ⌨  Raccourcis et touches spéciales"
-    echo "   3) 🔐 Serveur SSH (accès depuis un PC)"
-    echo "   4) 📱 Infos du téléphone"
-    echo "   5) 🔄 Tout mettre à jour"
-    echo "   6) 🤖 Discuter avec l'IA"
-    echo "   7) 📦 Installer un pack d'IA gratuites"
-    echo "   8) 📚 Voir / télécharger / changer d'IA"
-    echo "   9) 🗑  Supprimer une IA"
+    echo "   2) 🧰 Installer les outils Kali"
+    echo "   3) ⌨  Raccourcis et touches spéciales"
+    echo "   4) 🔐 Serveur SSH (accès depuis un PC)"
+    echo "   5) 📱 Infos du téléphone"
+    echo "   6) 🔄 Tout mettre à jour"
+    echo "   7) 🤖 Discuter avec l'IA"
+    echo "   8) 📦 Installer un pack d'IA gratuites"
+    echo "   9) 📚 Voir / télécharger / changer d'IA"
+    echo "  10) 🗑  Supprimer une IA"
     echo "   0) 🚪 Quitter"
     echo
     read -rp "   Votre choix : " c
     case "$c" in
       1) linux ;;
-      2) raccourcis ;;
-      3) serveur_ssh ;;
-      4) infos ;;
-      5) mise_a_jour ;;
-      6) ia ;;
-      7) installer_ia ;;
-      8) serveur_ia && liste_modeles && { echo; read -rp "Télécharger (t), activer (a) ou rien (Entrée) ? " r
+      2) outils_kali ;;
+      3) raccourcis ;;
+      4) serveur_ssh ;;
+      5) infos ;;
+      6) mise_a_jour ;;
+      7) ia ;;
+      8) installer_ia ;;
+      9) serveur_ia && liste_modeles && { echo; read -rp "Télécharger (t), activer (a) ou rien (Entrée) ? " r
          case "$r" in t|T) telecharger ;; a|A) activer ;; esac; } ;;
-      9) supprimer ;;
+      10) supprimer ;;
       0|q) exit 0 ;;
       *) echo "Choix inconnu" ;;
     esac
@@ -236,6 +250,7 @@ case "${1:-}" in
   serveur) serveur_web ;;
   stop) stop_ia ;;
   linux|kali) linux ;;
+  outils) outils_kali ;;
   raccourcis) raccourcis ;;
   ssh) serveur_ssh ;;
   infos) infos ;;

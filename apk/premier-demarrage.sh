@@ -18,8 +18,8 @@ cat <<'TXT'
    et « magie ».
 
    Étape suivante (Wi-Fi conseillé, ~1 Go) : installer Kali Linux
-   (image officielle) et les outils du terminal avancé — tmux,
-   neovim, git, ssh, python, nodejs, clang, fzf, ripgrep, btop…
+   (image officielle) AVEC ses outils déjà prêts — nmap, sqlmap,
+   hydra, nikto, john, metasploit… — et le terminal avancé.
 
 TXT
 printf '\033[0m'

@@ -3,6 +3,8 @@
 #   kali                 → entrer dans Kali Linux (l'installe au premier lancement)
 #   kali installer       → (ré)installer Kali Linux
 #   kali maj             → mettre Kali à jour (apt full-upgrade)
+#   kali outils          → (ré)installer les outils Kali de base
+#   kali outils complet  → installer TOUS les outils (kali-linux-headless)
 #   kali auto on|off     → ouvrir Kali automatiquement à chaque nouvelle session
 #   kali -- commande     → lancer une commande dans Kali
 set -uo pipefail
@@ -18,12 +20,35 @@ kali_installe() {
   command -v proot-distro >/dev/null 2>&1 && proot-distro login "$NOM" -- true >/dev/null 2>&1
 }
 
-fichier_theme() {
-  if [ -f "$MAGIE/config/theme.bashrc" ]; then
-    echo "$MAGIE/config/theme.bashrc"
+fichier_config() {
+  # Renvoie le chemin d'un fichier de config (installé dans l'APK ou dans le dépôt).
+  if [ -f "$MAGIE/config/$1" ]; then
+    echo "$MAGIE/config/$1"
   else
-    echo "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)/config/theme.bashrc"
+    echo "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)/config/$1"
   fi
+}
+fichier_theme() { fichier_config theme.bashrc; }
+
+# Installe les outils Kali (liste par défaut, ou le métapaquet complet).
+installer_outils() {
+  kali_installe || { echo -e "${rouge}✖ Installez d'abord Kali : kali installer${fin}"; return 1; }
+  local paquets
+  if [ "${1:-}" = complet ]; then
+    paquets="kali-linux-headless"
+    echo -e "${lime}➜ Installation de TOUS les outils Kali (kali-linux-headless, plusieurs Go)…${fin}"
+  else
+    paquets="$(grep -vE '^\s*#|^\s*$' "$(fichier_config kali-outils.txt)" | tr '\n' ' ')"
+    echo -e "${lime}➜ Installation des outils Kali (nmap, sqlmap, hydra, metasploit…)…${fin}"
+  fi
+  echo -e "${jaune}   Cela peut prendre du temps et de l'espace. Wi-Fi conseillé.${fin}"
+  proot-distro login "$NOM" -- bash -c "
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install -y $paquets
+    apt-get clean
+  " && echo -e "${lime}✔ Outils Kali installés. Exemples : nmap, sqlmap, hydra, msfconsole${fin}" \
+    || echo -e "${jaune}➜ Certains outils n'ont pas pu être installés. Réessayez : kali outils${fin}"
 }
 
 installer() {
@@ -49,6 +74,8 @@ installer() {
     apt-get clean
   ' || echo -e "${jaune}➜ Configuration partielle : relancez « kali maj » plus tard.${fin}"
 
+  installer_outils
+
   # Thème : fond noir, texte blanc, nom d'utilisateur vert lime
   mkdir -p "$PREFIX/tmp"
   cp "$(fichier_theme)" "$PREFIX/tmp/magie-theme.bashrc"
@@ -68,6 +95,7 @@ case "${1:-}" in
   maj)
     kali_installe || installer || exit 1
     proot-distro login "$NOM" -- bash -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y' ;;
+  outils) installer_outils "${2:-}" ;;
   auto)
     mkdir -p "$DOSSIER"
     case "${2:-}" in
@@ -83,6 +111,6 @@ case "${1:-}" in
     kali_installe || installer || exit 1
     exec proot-distro login --shared-tmp "$NOM" ;;
   -h|--help|aide)
-    sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' ;;
+    sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) echo "Commande inconnue : $1 (voir « kali aide »)"; exit 1 ;;
 esac
