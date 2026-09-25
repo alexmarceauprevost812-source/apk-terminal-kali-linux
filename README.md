@@ -159,6 +159,12 @@ Fichiers : `config/colors.properties` (couleurs du terminal, copiées dans `~/.t
 et `config/theme.bashrc` (invite de commande style Kali, appliquée dans Kali et dans Android).
 L'ancien thème est sauvegardé dans `~/.termux/colors.properties.bak`.
 
+## 💻 Sur un PC Windows ?
+
+L'APK est pour Android. Sur Windows, installez un **vrai Kali Linux** via WSL2 :
+voir **[windows/README.md](windows/README.md)** (installation automatique, mêmes outils
+et même thème noir / blanc / nom d'utilisateur vert lime).
+
 ## Pourquoi les IA ne sont pas « dans l'APK » ?
 
 Un modèle d'IA pèse de 1 à 5 Go : l'intégrer à l'APK la rendrait énorme et figée.
