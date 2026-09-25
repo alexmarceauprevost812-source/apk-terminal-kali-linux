@@ -1,0 +1,81 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# magie-update — met à jour le Terminal Magique.
+#   1) met à jour les commandes (magie, kali, guide, bureau, ia…) depuis GitHub
+#   2) vérifie si une nouvelle APK est disponible et donne le lien
+#   magie-update            → mise à jour complète
+#   magie-update --check    → vérifie seulement (silencieux si à jour)
+set -uo pipefail
+
+DEPOT_RAW="https://raw.githubusercontent.com/alexmarceauprevost812-source/apk-terminal-linux-/main"
+DEPOT_API="https://api.github.com/repos/alexmarceauprevost812-source/apk-terminal-linux-/releases/latest"
+RELEASES="https://github.com/alexmarceauprevost812-source/apk-terminal-linux-/releases/latest"
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+MAGIE="$PREFIX/share/magie"
+DOSSIER="$HOME/.magie"
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
+
+# Version installée (écrite par l'APK, sinon inconnue)
+version_installee() { cat "$MAGIE/VERSION" 2>/dev/null || echo "0"; }
+
+# Dernière version publiée sur GitHub (tag vX.Y.Z -> X.Y.Z)
+version_distante() {
+  curl -fsSL --max-time 10 "$DEPOT_API" 2>/dev/null \
+    | grep -m1 '"tag_name"' | sed -E 's/.*"v?([0-9.]+)".*/\1/'
+}
+
+# Compare deux versions : renvoie 0 si $1 < $2 (une mise à jour existe)
+plus_recent() {
+  [ "$1" = "$2" ] && return 1
+  local plus_grand
+  plus_grand="$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -n1)"
+  [ "$plus_grand" = "$2" ] && [ "$1" != "$2" ]
+}
+
+maj_commandes() {
+  echo -e "${lime}➜ Mise à jour des commandes (magie, kali, guide, bureau, ia…)…${fin}"
+  local tmp; tmp="$(mktemp -d)"
+  local ok=1
+  for f in magie kali guide bureau ia magie-installer magie-update; do
+    if curl -fsSL --max-time 15 "$DEPOT_RAW/bin/$f" -o "$tmp/$f"; then
+      install -m 755 "$tmp/$f" "$PREFIX/bin/$f"
+    else
+      ok=0
+    fi
+  done
+  mkdir -p "$MAGIE/config"
+  for f in modeles.txt kali-outils.txt kali-guide.txt colors.properties \
+           theme.bashrc avance.bashrc termux.properties kali-auto.bashrc; do
+    curl -fsSL --max-time 15 "$DEPOT_RAW/config/$f" -o "$MAGIE/config/$f" 2>/dev/null || true
+  done
+  curl -fsSL --max-time 20 "$DEPOT_RAW/config/fond-ecran.png" -o "$MAGIE/config/fond-ecran.png" 2>/dev/null || true
+  cp "$MAGIE/config/modeles.txt" "$DOSSIER/modeles.txt" 2>/dev/null || true
+  rm -rf "$tmp"
+  [ "$ok" -eq 1 ] && echo -e "${lime}✔ Commandes à jour${fin}" \
+    || echo -e "${jaune}➜ Certaines commandes n'ont pas pu être téléchargées (réseau ?)${fin}"
+}
+
+verifier_apk() {
+  local locale distante; locale="$(version_installee)"; distante="$(version_distante)"
+  [ -z "$distante" ] && return 2
+  if plus_recent "$locale" "$distante"; then
+    echo -e "${jaune}⭳ Nouvelle version de l'application disponible : ${blanc}v$distante${fin} (installée : v$locale)"
+    echo -e "   Téléchargez la nouvelle APK ici :"
+    echo -e "   ${blanc}$RELEASES${fin}"
+    return 0
+  fi
+  return 1
+}
+
+case "${1:-}" in
+  --check)
+    # Silencieux si à jour ; sert au message d'accueil.
+    verifier_apk || true ;;
+  *)
+    maj_commandes
+    echo
+    if ! verifier_apk; then
+      echo -e "${lime}✔ Application à jour (v$(version_installee)).${fin}"
+    fi
+    echo
+    echo -e "Pensez aussi à mettre à jour Kali :  ${blanc}kali maj${fin}" ;;
+esac

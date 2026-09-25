@@ -51,6 +51,20 @@ l'environnement Linux de base, puis compile l'APK. Le workflow GitHub Actions
 `.github/workflows/apk.yml` le lance à chaque modification de la branche `main`
 et publie les APK dans **Releases** (on peut aussi le lancer à la main depuis l'onglet Actions).
 
+### Mises à jour
+
+L'application **suit les mises à jour** toute seule :
+
+- à l'ouverture (au plus une fois par jour), elle vérifie sur GitHub s'il existe une
+  **nouvelle APK** et affiche le lien de téléchargement si c'est le cas ;
+- `magie-update` met à jour les **commandes** (`magie`, `kali`, `guide`, `bureau`, `ia`…)
+  et les fichiers de configuration directement depuis GitHub, sans réinstaller l'APK ;
+- `magie maj` fait tout : paquets Termux, commandes de l'app, et Kali (`kali maj`).
+
+Le numéro de version installé est dans `share/magie/VERSION`. Une nouvelle APK n'est
+nécessaire que pour les changements de l'application elle-même ; le reste se met à jour
+avec `magie-update`.
+
 ## 2. Autre méthode : Termux + script
 
 Si vous préférez l'appli Termux officielle
@@ -222,6 +236,7 @@ bin/guide               guide : ce que fait chaque outil Kali
 bin/bureau              bureau graphique XFCE (via VNC)
 bin/ia                  question rapide à l'IA
 bin/magie-installer     installation complète (depuis l'APK)
+bin/magie-update        met à jour l'app et vérifie la nouvelle APK
 config/termux.properties barre de touches, raccourcis, historique
 config/avance.bashrc    autocomplétion, fzf, zoxide, alias
 config/kali-auto.bashrc ouvre Kali à chaque nouvelle session

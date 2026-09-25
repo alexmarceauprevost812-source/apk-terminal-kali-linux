@@ -49,6 +49,8 @@ cp "$RACINE"/bin/* "$AJOUT/bin/"
 cp -r "$RACINE/bin" "$RACINE/config" "$RACINE/apk" "$RACINE/install.sh" "$AJOUT/share/magie/"
 rm -f "$AJOUT/share/magie/apk/construire.sh"
 cp "$RACINE/apk/zz-magie.sh" "$AJOUT/etc/profile.d/zz-magie.sh"
+# Version installée (pour le suivi des mises à jour)
+printf '%s\n' "$VERSION" > "$AJOUT/share/magie/VERSION"
 
 for zipf in app/src/main/cpp/bootstrap-*.zip; do
   ancien="$(sha256sum "$zipf" | cut -d' ' -f1)"

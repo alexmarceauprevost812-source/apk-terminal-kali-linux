@@ -167,6 +167,7 @@ serveur_ssh() {
 
 mise_a_jour() {
   yes | pkg upgrade -y
+  command -v magie-update >/dev/null 2>&1 && magie-update || true
   command -v proot-distro >/dev/null 2>&1 && proot-distro login kali -- true >/dev/null 2>&1 && kali maj || true
   echo -e "${vert}✔ Tout est à jour${fin}"
 }
@@ -184,7 +185,8 @@ aide() {
   magie raccourcis       touches spéciales et raccourcis
   magie ssh              se connecter au téléphone depuis un PC
   magie infos            infos du téléphone
-  magie maj              tout mettre à jour
+  magie maj              tout mettre à jour (app + Kali + paquets)
+  magie-update           mettre à jour l'app et vérifier la nouvelle APK
   magie-installer        (ré)installer les outils du terminal avancé
 
   IA gratuites (option) :
