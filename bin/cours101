@@ -3,6 +3,7 @@
 #   cours101              → menu des chapitres (✔ = déjà vus), continue où vous étiez
 #   cours101 3            → ouvre le chapitre 3
 #   cours101 suivant       → ouvre le prochain chapitre non vu
+#   cours101 commandes     → TOUTES les commandes du cours, une à la fois, prêtes à coller
 #   cours101 recommencer   → remet la progression à zéro
 set -uo pipefail
 
@@ -43,9 +44,17 @@ texte_chapitre() {
   ' "$FICHIER"
 }
 
-# Extrait les commandes d'exemple d'un chapitre (lignes du genre « $ echo Bonjour »).
+# Extrait les commandes d'exemple d'un chapitre (lignes du genre « $ echo Bonjour »),
+# sans le commentaire de fin (# ...) : la commande copiée reste propre à coller.
 commandes_du_chapitre() {
-  texte_chapitre "$1" | sed -n 's/^[[:space:]]*\$[[:space:]]*//p'
+  texte_chapitre "$1" | sed -n 's/^[[:space:]]*\$[[:space:]]*//p' | sed -E 's/[[:space:]]+#.*$//'
+}
+
+# Toutes les commandes de tous les chapitres, dans l'ordre.
+toutes_les_commandes() {
+  local total; total="$(nb_chapitres)"
+  local i
+  for ((i=1; i<=total; i++)); do commandes_du_chapitre "$i"; done
 }
 
 copier_commande() {
@@ -127,6 +136,35 @@ ouvrir_chapitre() {
   fi
 }
 
+# Parcours guidé : copie chaque commande du cours l'une après l'autre.
+# Après chaque commande copiée, la SUIVANTE est déjà affichée/prête, jusqu'au résultat final.
+mode_commandes() {
+  local -a cmds=()
+  local ligne
+  while IFS= read -r ligne; do [ -n "$ligne" ] && cmds+=("$ligne"); done < <(toutes_les_commandes)
+  local total="${#cmds[@]}"
+  if [ "$total" -eq 0 ]; then
+    echo -e "${jaune}Aucune commande trouvée.${fin}"; return 0
+  fi
+  clear 2>/dev/null || true
+  echo -e "${lime}🎓 Cours 101 — toutes les commandes, une à la fois${fin}"
+  echo -e "${gris}Chaque commande se copie automatiquement ; collez-la (appui long → Coller), essayez-la,${fin}"
+  echo -e "${gris}puis Entrée pour passer à la suivante. 'q' pour arrêter avant la fin.${fin}\n"
+  local i=0
+  while [ "$i" -lt "$total" ]; do
+    echo -e "${gris}────────────────────────────────────────${fin}"
+    echo -e "${blanc}Commande $((i+1))/$total :${fin}"
+    copier_commande "${cmds[$i]}"
+    i=$((i+1))
+    if [ "$i" -lt "$total" ]; then
+      read -rp "$(echo -e "${blanc}Entrée pour la commande suivante (${cmds[$i]}), ou 'q' pour arrêter : ${fin}")" rep
+      [ "$rep" = "q" ] && break
+    fi
+  done
+  echo -e "${gris}────────────────────────────────────────${fin}"
+  echo -e "${lime}✔ Résultat : $i/$total commande(s) copiée(s) et essayée(s).${fin}"
+}
+
 menu() {
   local total; total="$(nb_chapitres)"
   echo -e "${lime}🎓 Cours 101 — les bases, pas à pas${fin}\n"
@@ -144,17 +182,20 @@ menu() {
     echo -e "  ${blanc}Continuer où vous étiez :  cours101 suivant${fin} (chapitre $suite)"
   fi
   echo -e "  ${blanc}Ouvrir un chapitre précis :  cours101 <numéro>${fin}"
+  echo -e "  ${blanc}Toutes les commandes, une à la fois :  cours101 commandes${fin}"
   read -rp "  > " rep
   [ -z "$rep" ] && return 0
   case "$rep" in
     q|quitter) return 0 ;;
     suivant) [ -n "$suite" ] && ouvrir_chapitre "$suite" || ouvrir_chapitre 1 ;;
+    commandes) mode_commandes ;;
     *) ouvrir_chapitre "$rep" ;;
   esac
 }
 
 case "${1:-}" in
   "" ) menu ;;
+  commandes) mode_commandes ;;
   suivant)
     s="$(premier_non_vu)"
     if [ -n "$s" ]; then ouvrir_chapitre "$s"; else echo -e "${lime}✔ Cours déjà terminé — recommencer :  cours101 recommencer${fin}"; fi
@@ -163,7 +204,7 @@ case "${1:-}" in
     rm -f "$FICHIER_VU"
     echo -e "${lime}✔ Progression remise à zéro.${fin}"
     ;;
-  -h|--help|aide) sed -n '2,6p' "$0" | sed 's/^# \{0,1\}//' ;;
+  -h|--help|aide) sed -n '2,7p' "$0" | sed 's/^# \{0,1\}//' ;;
   *[!0-9]* ) echo -e "${rouge}✖ Commande inconnue. Essayez :  cours101${fin}" ;;
   * ) ouvrir_chapitre "$1" ;;
 esac

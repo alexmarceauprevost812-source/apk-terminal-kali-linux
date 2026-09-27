@@ -1,6 +1,7 @@
 # Cours 101 — les bases, en français, pour un débutant.
 # Format d'un chapitre :  @numéro|Titre   puis le texte (plusieurs lignes),
-# jusqu'au prochain @.
+# jusqu'au prochain @. Les lignes commençant par $ sont des commandes :
+# elles sont listées séparément et peuvent être copiées une par une.
 
 @1|Qu'est-ce qu'un terminal ?
 Le terminal, c'est une fenêtre où l'on TAPE des commandes au lieu de toucher
@@ -12,7 +13,7 @@ Vous êtes actuellement DANS un terminal. Le symbole à la fin de la ligne
 (souvent $ ou #) veut dire : « je t'écoute, tape une commande ».
 
 Exemple simple à essayer maintenant :
-  $ echo Bonjour
+$ echo Bonjour
 Ça affiche « Bonjour ». C'est tout : une commande, Entrée, un résultat.
 
 @2|Qu'est-ce que Linux ?
@@ -35,32 +36,31 @@ Dans ce terminal, Kali tourne « à côté » d'Android, sans rien modifier au
 système ni au téléphone (voir « à quoi ça sert » dans le prochain chapitre
 sur la sécurité).
 
-Pour y entrer : tapez  kali
-Pour en sortir et revenir au terminal Android : tapez  exit
+Pour y entrer :
+$ kali
+Pour en sortir et revenir au terminal Android :
+$ exit
 
 @4|Se déplacer : dossiers et fichiers
 Un ordinateur range ses fichiers dans des DOSSIERS, imbriqués comme des
-poupées russes. Quatre commandes suffisent pour se promener :
+poupées russes. Quatre commandes suffisent pour se promener — essayez-les :
 
-  pwd            → affiche où vous êtes (le dossier actuel)
-  ls             → liste ce qu'il y a ici (fichiers et dossiers)
-  cd nom_dossier → entre dans un dossier
-  cd ..          → remonte d'un dossier
-  cd             → revient directement à votre dossier personnel
-
-Essayez maintenant :
-  $ pwd
-  $ ls
+$ pwd            # affiche où vous êtes (le dossier actuel)
+$ ls             # liste ce qu'il y a ici (fichiers et dossiers)
+$ cd nom_dossier # entre dans un dossier (remplacez « nom_dossier »)
+$ cd ..          # remonte d'un dossier
+$ cd             # revient directement à votre dossier personnel
 
 @5|Lire, créer, copier, supprimer
-Quelques commandes pour manipuler les fichiers :
+Quelques commandes pour manipuler les fichiers (remplacez les noms par les
+vôtres) :
 
-  cat fichier.txt        → affiche le contenu d'un fichier texte
-  nano fichier.txt        → ouvre un éditeur simple pour écrire/modifier
-  cp source destination  → copie un fichier
-  mv source destination  → déplace ou renomme un fichier
-  rm fichier              → SUPPRIME un fichier (⚠️ définitif, pas de corbeille)
-  mkdir nom               → crée un nouveau dossier
+$ cat fichier.txt              # affiche le contenu d'un fichier texte
+$ nano fichier.txt              # ouvre un éditeur simple pour écrire/modifier
+$ cp source destination        # copie un fichier
+$ mv source destination        # déplace ou renomme un fichier
+$ rm fichier                    # SUPPRIME un fichier (⚠️ définitif, pas de corbeille)
+$ mkdir nom_dossier              # crée un nouveau dossier
 
 Dans nano : on tape, puis Ctrl+O (enregistrer), Entrée, puis Ctrl+X (quitter).
 
@@ -69,20 +69,21 @@ Sur Android normal, on installe des applis depuis le Play Store. Sous
 Linux, on installe des LOGICIELS depuis un « dépôt » avec une seule
 commande :
 
-  Dans le terminal Android :  pkg install nom_du_logiciel
-  Dans Kali :                 apt install nom_du_logiciel
+$ pkg install nom_du_logiciel   # dans le terminal Android
+$ apt install nom_du_logiciel   # dans Kali
+$ apt install nmap               # exemple concret : installe l'outil nmap
 
-Exemple : « apt install nmap » installe l'outil nmap dans Kali.
 C'est exactement ce que font `catalogue` et `bibliotheque` pour vous,
 sans avoir à retenir les noms exacts.
 
 @7|Trouver et comprendre un outil
-Ce terminal a trois façons de trouver un outil sans le connaître d'avance :
+Ce terminal a plusieurs façons de trouver un outil sans le connaître
+d'avance :
 
-  guide            → explique ce que fait chaque outil (en une phrase + un exemple)
-  catalogue        → range les outils par catégorie et les installe
-  bibliotheque     → montre les outils QUE VOUS AVEZ déjà installés, classés
-  apps             → un menu tactile : on choisit, la commande se copie toute seule
+$ guide            # explique ce que fait chaque outil (en une phrase + un exemple)
+$ catalogue        # range les outils par catégorie et les installe
+$ bibliotheque     # montre les outils QUE VOUS AVEZ déjà installés, classés
+$ apps             # un menu tactile : on choisit, la commande se copie toute seule
 
 Un réflexe utile pour un débutant : quand vous ne savez pas quoi taper,
 utilisez « ia commande » (voir le chapitre sur l'IA) ou ouvrez « apps ».
@@ -91,9 +92,9 @@ utilisez « ia commande » (voir le chapitre sur l'IA) ou ouvrez « apps ».
 Ce terminal contient une IA locale (Ollama) qui tourne entièrement SUR le
 téléphone, sans compte ni Internet une fois téléchargée.
 
-  ia "une question"            → lui poser une question
-  ia commande "ce que je veux" → elle propose UNE commande et l'explique ;
-                                  elle ne l'exécute que si vous dites oui
+$ ia "une question"             # lui poser une question
+$ ia commande "ce que je veux"  # elle propose UNE commande et l'explique ;
+                                 # elle ne l'exécute que si vous dites oui
 
 C'est la meilleure façon de commencer si vous ne savez pas quelle commande
 taper : décrivez simplement ce que vous voulez faire, en français.
@@ -112,15 +113,27 @@ jusqu'à 10 ans de prison). Ce terminal sert à APPRENDRE et à protéger vos
 propres appareils — pas à attaquer ceux des autres.
 
 @10|Récapitulatif : les commandes à retenir
-Un petit résumé de ce que vous venez d'apprendre :
+Toutes les commandes vues dans ce cours, prêtes à copier :
 
-  pwd, ls, cd            → se déplacer
-  cat, nano, cp, mv, rm  → gérer des fichiers
-  pkg / apt install      → installer un logiciel
-  kali / exit            → entrer et sortir de Kali
-  guide, catalogue        → comprendre et installer des outils
-  bibliotheque, apps      → voir ce que vous avez, ou choisir sans taper
-  ia, ia commande         → demander de l'aide à l'IA
+$ pwd
+$ ls
+$ cd nom_dossier
+$ cat fichier.txt
+$ nano fichier.txt
+$ cp source destination
+$ mv source destination
+$ rm fichier
+$ mkdir nom_dossier
+$ pkg install nom_du_logiciel
+$ apt install nom_du_logiciel
+$ kali
+$ exit
+$ guide
+$ catalogue
+$ bibliotheque
+$ apps
+$ ia "une question"
+$ ia commande "ce que je veux"
 
 Bravo, vous avez fini le cours 101 ! Tapez « magie » pour voir le menu
 complet, ou « apps » pour explorer les outils sans rien taper.

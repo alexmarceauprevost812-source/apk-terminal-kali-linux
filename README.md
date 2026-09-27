@@ -208,14 +208,18 @@ avec autorisation écrite).
 cours101              # menu des chapitres (✔ = déjà vus), reprend où vous étiez
 cours101 3             # ouvre directement le chapitre 3
 cours101 suivant       # ouvre le prochain chapitre non vu
+cours101 commandes     # TOUTES les commandes du cours, une à la fois, prêtes à coller
 cours101 recommencer   # remet la progression à zéro
 ```
 
 Chaque chapitre montre ses commandes-exemples, numérotées : tapez le numéro
 pour la **copier** directement (prête à coller dans le terminal), comme dans
-`apps`/`guide copier`. (Aussi `kali cours101`, `apps cours101`, et la touche
-« c » du menu `magie`.) Le contenu est dans `config/cours101.txt`, mis à jour
-par `magie-update` sans réinstaller l'APK.
+`apps`/`guide copier`. `cours101 commandes` va plus loin : il les enchaîne
+**toutes**, une par une — chaque commande se copie automatiquement, vous la
+collez et l'essayez, puis Entrée affiche et copie la **suivante**, jusqu'au
+résultat final. (Aussi `kali cours101`, `apps cours101`, et la touche « c »
+du menu `magie`.) Le contenu est dans `config/cours101.txt`, mis à jour par
+`magie-update` sans réinstaller l'APK.
 
 ## 📚 Catalogue des outils (par catégorie)
 
