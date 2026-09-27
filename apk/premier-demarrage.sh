@@ -18,6 +18,9 @@ cat <<'TXT'
    et « magie ».  Tapez « apps » pour le BUREAU : choisir un outil
    et copier sa commande, prête à coller dans le terminal.
 
+   Débutant ? Tapez « cours101 » : un petit cours pas à pas pour
+   comprendre le terminal, Linux, Kali et l'IA avant de foncer.
+
    Étape suivante (Wi-Fi conseillé, ~1 Go) : installer Kali Linux
    (image officielle) AVEC ses outils déjà prêts — nmap, sqlmap,
    hydra, nikto, john, metasploit… — et le terminal avancé.

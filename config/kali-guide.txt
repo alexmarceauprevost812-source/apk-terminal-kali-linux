@@ -19,7 +19,7 @@ $ sqlmap -u "https://mon-site.fr/page?id=1" --batch
 @hydra | Mots de passe | Teste des mots de passe sur un service (SSH, FTP…)
 hydra essaie une liste de mots de passe contre un service pour repérer les
 comptes à mot de passe faible. À n'utiliser que sur vos propres comptes.
-$ hydra -l admin -P liste.txt ssh://192.168.1.10
+$ hydra -l admin -P liste.txt ssh://192.168.1.10   # votre propre appareil
 
 @nikto | Web | Cherche les faiblesses connues d'un serveur web
 nikto interroge un serveur web et signale les fichiers dangereux, les
@@ -69,7 +69,7 @@ $ tcpdump -i any -c 20
 @netcat | Réseau | « Couteau suisse » des connexions réseau (commande nc)
 netcat ouvre des connexions réseau à la main : tester un port, transférer
 un fichier, ouvrir un mini-serveur.
-$ nc -vz 192.168.1.10 22         # teste si le port SSH est ouvert
+$ nc -vz 192.168.1.10 22         # teste si le port SSH est ouvert (votre propre appareil)
 
 @whois | Réseau | Donne les infos publiques d'un domaine
 whois affiche le propriétaire déclaré, les dates et les serveurs DNS d'un

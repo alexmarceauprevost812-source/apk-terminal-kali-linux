@@ -199,6 +199,7 @@ aide() {
 🐉 magie — Terminal Kali Linux
 
   magie                  menu interactif
+  cours101               🎓 cours pas à pas pour débuter (terminal, Linux, Kali, IA)
   apps                   🖥  bureau : choisir un outil et copier sa commande
   kali                   entrer dans Kali Linux (aussi : magie linux)
   kali auto on|off       ouvrir Kali à chaque nouvelle session (ou non)
@@ -238,6 +239,7 @@ menu() {
     echo -e "${rouge_vif}   ╚══════════════════════════════════════════╝${fin}"
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
     echo -e "   ${orange}a) 🖥  BUREAU — choisir un outil et copier sa commande${fin}"
+    echo -e "   ${orange}c) 🎓 COURS 101 — débuter pas à pas${fin}"
     echo
     echo "   1) 🐉 Entrer dans Kali Linux"
     echo "   2) 📚 Catalogue des outils (par catégorie)"
@@ -260,6 +262,7 @@ menu() {
     read -rp "   Votre choix : " c
     case "$c" in
       a|A|apps|bureau-texte) apps ;;
+      c|C|cours101) cours101 ;;
       1) linux ;;
       2) catalogue ;;
       3) outils_kali ;;
@@ -300,6 +303,7 @@ case "${1:-}" in
   linux|kali) linux ;;
   outils) outils_kali ;;
   apps|bureau-texte) shift; exec apps "$@" ;;
+  cours101) shift; exec cours101 "$@" ;;
   guide) shift; exec guide "$@" ;;
   catalogue) shift; exec catalogue "$@" ;;
   bibliotheque|bibliothèque) shift; exec bibliotheque "$@" ;;

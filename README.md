@@ -194,6 +194,29 @@ Pour tout ajouter (l'ensemble d'outils standard), tapez `kali outils complet`
 > Utilisez les outils de sécurité uniquement sur vos propres appareils et réseaux,
 > ou avec une autorisation écrite.
 
+## 🎓 Cours 101 — débuter pas à pas
+
+Vous ne connaissez pas Linux ni le terminal ? Un petit cours en 10 chapitres,
+en français, pour comprendre les bases avant de foncer dans les outils :
+qu'est-ce qu'un terminal, Linux, Kali Linux, se déplacer dans les dossiers,
+lire/créer/copier/supprimer des fichiers, installer un logiciel, trouver et
+comprendre un outil, utiliser l'IA gratuite, et **la règle la plus importante :
+la légalité** (n'utiliser ces outils que sur vos propres appareils/réseaux, ou
+avec autorisation écrite).
+
+```bash
+cours101              # menu des chapitres (✔ = déjà vus), reprend où vous étiez
+cours101 3             # ouvre directement le chapitre 3
+cours101 suivant       # ouvre le prochain chapitre non vu
+cours101 recommencer   # remet la progression à zéro
+```
+
+Chaque chapitre montre ses commandes-exemples, numérotées : tapez le numéro
+pour la **copier** directement (prête à coller dans le terminal), comme dans
+`apps`/`guide copier`. (Aussi `kali cours101`, `apps cours101`, et la touche
+« c » du menu `magie`.) Le contenu est dans `config/cours101.txt`, mis à jour
+par `magie-update` sans réinstaller l'APK.
+
 ## 📚 Catalogue des outils (par catégorie)
 
 Comme sur <https://www.kali.org/tools/>, les outils sont **classés par catégorie**
@@ -249,6 +272,7 @@ apps             # ouvre le bureau (aussi : touche « a » du menu magie)
 
 À l'ouverture, des « applications » s'affichent :
 
+- 🎓 **Cours 101** — débuter pas à pas (terminal, Linux, Kali, IA, légalité)
 - 📖 **Guide des outils** — chaque outil, ce qu'il fait, et ses commandes-exemples à copier
 - 🔎 **Ma bibliothèque** — les outils installés, classés par famille
 - 🧰 **Catalogue** — trouver et installer un outil
