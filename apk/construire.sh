@@ -88,7 +88,7 @@ AJOUT="$TRAVAIL/ajout"
 rm -rf "$AJOUT"
 mkdir -p "$AJOUT/bin" "$AJOUT/share/magie" "$AJOUT/etc/profile.d"
 cp "$RACINE"/bin/* "$AJOUT/bin/"
-cp -r "$RACINE/bin" "$RACINE/config" "$RACINE/apk" "$RACINE/install.sh" "$AJOUT/share/magie/"
+cp -r "$RACINE/bin" "$RACINE/config" "$RACINE/apk" "$RACINE/web" "$RACINE/install.sh" "$AJOUT/share/magie/"
 rm -f "$AJOUT/share/magie/apk/construire.sh"
 cp "$RACINE/apk/zz-magie.sh" "$AJOUT/etc/profile.d/zz-magie.sh"
 # Version installée (pour le suivi des mises à jour)

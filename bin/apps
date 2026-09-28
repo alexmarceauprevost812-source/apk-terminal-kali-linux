@@ -221,7 +221,8 @@ bureau_accueil() {
     echo -e "   🔎 ${lime} 4${fin})  ${gras}Ma bibliothèque${fin}       ${gris}mes outils installés, par famille${fin}"
     echo -e "   🧰 ${lime} 5${fin})  ${gras}Catalogue${fin}             ${gris}trouver et installer un outil${fin}"
     echo -e "   ⭐ ${lime} 6${fin})  ${gras}Commandes rapides${fin}     ${gris}les commandes les plus utiles à copier${fin}"
-    echo -e "   🐉 ${lime} 7${fin})  ${gras}Terminal Kali${fin}         ${gris}revenir au terminal${fin}"
+    echo -e "   🖼  ${lime} 7${fin})  ${gras}Application${fin}           ${gris}interface graphique : chat + guide, dans le navigateur${fin}"
+    echo -e "   🐉 ${lime} 8${fin})  ${gras}Terminal Kali${fin}         ${gris}revenir au terminal${fin}"
     echo
     echo -e "   ${gris}0) Fermer le bureau${fin}"
     echo -e "\n   ${blanc}💡 Choisis un outil → sa commande se copie → colle-la dans le terminal.${fin}"
@@ -233,7 +234,8 @@ bureau_accueil() {
       4) app_biblio ;;
       5) app_catalogue ;;
       6) app_rapides ;;
-      7|q|Q|quitter) titre "Terminal"; echo -e "   ${lime}➜ Te voilà de retour dans le terminal.${fin}\n"; return 0 ;;
+      7) command -v application >/dev/null 2>&1 && application || { echo -e "${jaune}Commande « application » indisponible.${fin}"; pause; } ;;
+      8|q|Q|quitter) titre "Terminal"; echo -e "   ${lime}➜ Te voilà de retour dans le terminal.${fin}\n"; return 0 ;;
       0|exit) clear 2>/dev/null; return 0 ;;
       "") ;;
       *) : ;;

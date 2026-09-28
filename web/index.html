@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Terminal Magique</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="titre">🐉 <span>Terminal Magique</span></div>
+  <nav class="onglets">
+    <button class="onglet actif" data-onglet="chat">💬 Chat</button>
+    <button class="onglet" data-onglet="guide">📖 Guide</button>
+    <button class="onglet" data-onglet="reglages">⚙️ Réglages</button>
+  </nav>
+</header>
+
+<main>
+
+  <section id="vue-chat" class="vue actif">
+    <div class="source-ia">
+      <button class="pilule actif" data-source="local">🧠 IA locale (gratuite)</button>
+      <button class="pilule" data-source="claude">🛠 Claude</button>
+    </div>
+    <div id="messages" class="messages">
+      <div class="message ia">
+        <div class="bulle">Bonjour ! Posez-moi une question, ou demandez-moi d'expliquer une commande.
+        Tout reste sur votre téléphone avec l'IA locale ; avec Claude, la question part vers Anthropic.</div>
+      </div>
+    </div>
+    <form id="form-chat" class="zone-saisie">
+      <textarea id="saisie" placeholder="Écrivez votre message…" rows="1"></textarea>
+      <button type="submit" id="envoyer">➤</button>
+    </form>
+  </section>
+
+  <section id="vue-guide" class="vue">
+    <div class="guide-barre">
+      <input id="guide-recherche" type="search" placeholder="Chercher un outil (ex. nmap, web, mots de passe)…">
+    </div>
+    <div id="guide-liste" class="guide-liste"></div>
+  </section>
+
+  <section id="vue-reglages" class="vue">
+    <h2>Réglages</h2>
+
+    <div class="carte">
+      <h3>🧠 IA locale</h3>
+      <p class="explication">Modèle actif : <b id="modele-local">—</b> (changez-le avec <code>magie activer</code> dans le terminal).</p>
+    </div>
+
+    <div class="carte">
+      <h3>🛠 Claude (Anthropic)</h3>
+      <p class="explication">Nécessite une clé API Anthropic (console.anthropic.com) et Internet. Votre clé reste
+      uniquement sur ce téléphone (elle n'est jamais envoyée nulle part sauf à Anthropic pour répondre).</p>
+      <label>Clé API
+        <input id="claude-cle" type="password" placeholder="sk-ant-...">
+      </label>
+      <label>Modèle
+        <input id="claude-modele" type="text" placeholder="claude-sonnet-4-5">
+      </label>
+      <button id="claude-enregistrer" class="bouton">Enregistrer</button>
+      <p id="claude-statut" class="statut"></p>
+    </div>
+
+    <div class="carte avertissement">
+      <h3>⚠️ Rappel</h3>
+      <p class="explication">N'utilisez les outils de ce terminal que sur VOS PROPRES appareils/réseaux, ou avec
+      une autorisation écrite explicite du propriétaire.</p>
+    </div>
+  </section>
+
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

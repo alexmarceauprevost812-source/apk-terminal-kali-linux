@@ -44,7 +44,7 @@ maj_commandes() {
   echo -e "${lime}➜ Mise à jour des commandes (magie, kali, guide, bureau, ia…)…${fin}"
   local tmp; tmp="$(mktemp -d)"
   local ok=1
-  for f in magie kali guide catalogue bibliotheque cours101 parcours bureau apps copier ia claude-code magie-installer magie-update; do
+  for f in magie kali guide catalogue bibliotheque cours101 parcours application bureau apps copier ia claude-code magie-installer magie-update; do
     if curl -fsSL --max-time 15 "$DEPOT_RAW/bin/$f" -o "$tmp/$f"; then
       install -m 755 "$tmp/$f" "$PREFIX/bin/$f"
     else
@@ -57,6 +57,10 @@ maj_commandes() {
     curl -fsSL --max-time 15 "$DEPOT_RAW/config/$f" -o "$MAGIE/config/$f" 2>/dev/null || true
   done
   curl -fsSL --max-time 20 "$DEPOT_RAW/config/fond-ecran.png" -o "$MAGIE/config/fond-ecran.png" 2>/dev/null || true
+  mkdir -p "$MAGIE/web"
+  for f in index.html style.css app.js serveur.py; do
+    curl -fsSL --max-time 15 "$DEPOT_RAW/web/$f" -o "$MAGIE/web/$f" 2>/dev/null || true
+  done
   cp "$MAGIE/config/modeles.txt" "$DOSSIER/modeles.txt" 2>/dev/null || true
   rm -rf "$tmp"
   activer_couleurs

@@ -208,6 +208,7 @@ aide() {
   catalogue              parcourir/installer les outils par catégorie
   bibliotheque           mes outils installés, classés (attaque, défense, protection, mots de passe…)
   parcours               🧭 parcours guidés (plusieurs outils enchaînés, étape par étape)
+  application            🖼  interface graphique (chat + guide, dans le navigateur)
   bureau                 bureau graphique Kali (XFCE via VNC)
   magie raccourcis       touches spéciales et raccourcis
   magie sessions         ouvrir / fermer (supprimer 🗑) des sessions
@@ -242,6 +243,7 @@ menu() {
     echo -e "   ${orange}a) 🖥  BUREAU — choisir un outil et copier sa commande${fin}"
     echo -e "   ${orange}c) 🎓 COURS 101 — débuter pas à pas${fin}"
     echo -e "   ${orange}p) 🧭 PARCOURS — plusieurs outils enchaînés, étape par étape${fin}"
+    echo -e "   ${orange}g) 🖼  APPLICATION — interface graphique (chat + guide)${fin}"
     echo
     echo -e "   ${rouge_vif} 1)${fin} 🐉 Entrer dans Kali Linux"
     echo -e "   ${rouge_vif} 2)${fin} 📚 Catalogue des outils (par catégorie)"
@@ -267,6 +269,7 @@ menu() {
       c|C|cours101) cours101 ;;
       p|P|parcours) read -rp "   Quel parcours ? (Entrée pour la liste) : " pr
          [ -n "$pr" ] && parcours "$pr" || parcours ;;
+      g|G|application) application ;;
       1) linux ;;
       2) catalogue ;;
       3) outils_kali ;;
@@ -312,6 +315,7 @@ case "${1:-}" in
   catalogue) shift; exec catalogue "$@" ;;
   bibliotheque|bibliothèque) shift; exec bibliotheque "$@" ;;
   parcours) shift; exec parcours "$@" ;;
+  application|appli) shift; exec application "$@" ;;
   bureau) shift; exec bureau "$@" ;;
   raccourcis) raccourcis ;;
   sessions) sessions_menu ;;

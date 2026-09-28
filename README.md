@@ -347,6 +347,37 @@ Entrée, rien n'est exécuté.
 > 💡 Ça marche aussi pour apprendre à utiliser un outil déjà téléchargé :
 > `ia commande "comment scanner mon réseau avec nmap"` explique et propose la commande.
 
+## 🖼️ Application — interface graphique (chat + guide)
+
+En plus du terminal, une vraie **interface graphique** — écran noir, boutons
+orange, texte blanc, code coloré — pour discuter avec l'IA sans taper de
+commandes, et parcourir le guide des outils avec les doigts.
+
+```bash
+application            # démarre l'interface et l'ouvre dans le navigateur
+application arreter    # arrête le serveur local
+```
+
+(aussi `magie application`, et la touche « g » du menu `magie`, ou la tuile
+« Application » dans `apps`.) Trois onglets :
+
+- 💬 **Chat** — bascule entre l'**IA locale** (gratuite, hors-ligne, Ollama) et
+  **Claude** (nécessite une clé API Anthropic et Internet). Le code dans les
+  réponses est coloré automatiquement (mots-clés, chaînes, nombres…).
+- 📖 **Guide** — les mêmes outils que `guide`, mais à parcourir/chercher au doigt.
+- ⚙️ **Réglages** — enregistrer votre clé API Claude (reste uniquement sur le
+  téléphone, dans `~/.magie/claude-api-key`, jamais envoyée ailleurs qu'à
+  Anthropic pour répondre) et choisir son modèle.
+
+Ça tourne **entièrement sur le téléphone** : un petit serveur local
+(`web/serveur.py`, Python seulement — déjà installé) sert la page à
+`http://127.0.0.1:8765`, uniquement accessible depuis le téléphone lui-même
+(rien n'est exposé au réseau). Pour l'avoir comme une appli séparée : dans le
+navigateur, menu → « Ajouter à l'écran d'accueil ».
+
+> ⚠️ La clé API Claude est à vous (console.anthropic.com) — l'usage de
+> l'API Anthropic peut être payant selon votre compte.
+
 ## 🛠️ Claude Code (assistant officiel d'Anthropic)
 
 En plus de l'IA locale gratuite ci-dessus, vous pouvez installer **Claude Code**,
@@ -473,6 +504,11 @@ bin/catalogue           catalogue des outils par catégorie (installe)
 bin/bibliotheque        mes outils installés, classés par famille
 bin/cours101            cours 101 : débuter pas à pas (terminal, Linux, Kali, IA)
 bin/parcours            parcours guidés : plusieurs outils enchaînés, étape par étape
+bin/application         lance l'interface graphique (chat + guide) locale
+web/index.html          interface graphique : structure (onglets chat/guide/réglages)
+web/style.css           interface graphique : thème noir/orange/blanc + code coloré
+web/app.js              interface graphique : chat, coloration du code, guide au doigt
+web/serveur.py          serveur local (Python) : relaie vers Ollama et/ou Claude
 bin/bureau              bureau graphique XFCE (via VNC)
 bin/apps                bureau tactile : choisir un outil et copier sa commande
 bin/copier              met une commande dans le presse-papier (OSC 52 / xclip)

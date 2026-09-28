@@ -1,0 +1,89 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# application — interface graphique du Terminal Magique (chat + guide), dans le navigateur.
+#   application            → démarre le serveur local et l'ouvre
+#   application arreter    → arrête le serveur local
+#   application cle <clé> [modele]   → enregistre la clé API Claude (et le modèle)
+# ⚠️ Sert uniquement sur 127.0.0.1 (votre téléphone) — rien n'est exposé au réseau.
+set -uo pipefail
+
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+DOSSIER="$HOME/.magie"
+PORT="${APPLICATION_PORT:-8765}"
+PIDFILE="$DOSSIER/application.pid"
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; jaune='\033[1;33m'; rouge='\033[1;31m'; fin='\033[0m'
+
+# Sommes-nous dans Kali (proot) ? Cette appli tourne côté Android/Termux.
+grep -qi '^ID=kali' /etc/os-release 2>/dev/null && {
+  echo -e "${rouge}✖ Lancez « application » depuis le terminal Android (pas depuis Kali).${fin}"
+  echo -e "${jaune}➜ Tapez d'abord  ${blanc}exit${jaune}  pour revenir, puis relancez.${fin}"
+  exit 1
+}
+
+fichier_serveur() {
+  for f in "$PREFIX/share/magie/web/serveur.py" \
+           "/usr/local/share/magie/web/serveur.py" \
+           "$HOME/.magie/web/serveur.py" \
+           "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)/web/serveur.py"; do
+    [ -f "$f" ] && { echo "$f"; return 0; }
+  done
+  return 1
+}
+
+demarrer() {
+  if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+    echo -e "${lime}✔ Déjà lancé.${fin}"
+  else
+    local serveur; serveur="$(fichier_serveur)" || {
+      echo -e "${rouge}✖ Interface introuvable (web/serveur.py). Lancez magie-update.${fin}"; return 1
+    }
+    command -v python3 >/dev/null 2>&1 || { echo -e "${jaune}➜ Installation de Python…${fin}"; pkg install -y python; }
+    mkdir -p "$DOSSIER"
+    APPLICATION_PORT="$PORT" nohup python3 "$serveur" >"$DOSSIER/application.log" 2>&1 &
+    echo $! > "$PIDFILE"
+    sleep 1
+    if kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+      echo -e "${lime}✔ Serveur lancé sur http://127.0.0.1:$PORT${fin}"
+    else
+      echo -e "${rouge}✖ Le serveur n'a pas démarré. Détails :  cat $DOSSIER/application.log${fin}"
+      rm -f "$PIDFILE"; return 1
+    fi
+  fi
+  echo -e "${blanc}➜ Ouverture dans le navigateur…${fin}"
+  if command -v termux-open-url >/dev/null 2>&1; then
+    termux-open-url "http://127.0.0.1:$PORT"
+  elif command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "http://127.0.0.1:$PORT" >/dev/null 2>&1 &
+  else
+    echo -e "${blanc}   Ouvrez manuellement dans votre navigateur :  http://127.0.0.1:$PORT${fin}"
+  fi
+  echo -e "${blanc}Pour l'ajouter à l'écran d'accueil : menu du navigateur → « Ajouter à l'écran d'accueil ».${fin}"
+  echo -e "${blanc}Pour arrêter :  application arreter${fin}"
+}
+
+arreter() {
+  if [ -f "$PIDFILE" ] && kill "$(cat "$PIDFILE")" 2>/dev/null; then
+    rm -f "$PIDFILE"
+    echo -e "${lime}✔ Serveur arrêté.${fin}"
+  else
+    echo -e "${jaune}➜ Le serveur n'était pas lancé.${fin}"
+    rm -f "$PIDFILE"
+  fi
+}
+
+cle() {
+  local valeur="${1:?Précisez la clé API après « application cle »}"
+  local modele="${2:-}"
+  mkdir -p "$DOSSIER"
+  printf '%s' "$valeur" > "$DOSSIER/claude-api-key"
+  chmod 600 "$DOSSIER/claude-api-key"
+  [ -n "$modele" ] && { printf '%s' "$modele" > "$DOSSIER/claude-modele"; chmod 600 "$DOSSIER/claude-modele"; }
+  echo -e "${lime}✔ Clé Claude enregistrée${modele:+ (modèle : $modele)}.${fin}"
+}
+
+case "${1:-}" in
+  ""|demarrer|start) demarrer ;;
+  arreter|stop) arreter ;;
+  cle|clef|key) shift; cle "$@" ;;
+  -h|--help|aide) sed -n '2,5p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) echo -e "${rouge}✖ Commande inconnue. Essayez :  application${fin}" ;;
+esac
