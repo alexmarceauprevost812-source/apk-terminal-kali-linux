@@ -235,7 +235,7 @@ menu() {
   while true; do
     clear
     echo -e "${rouge_vif}   ╔══════════════════════════════════════════╗${fin}"
-    echo -e "${rouge_vif}   ║${blanc}    🐉  ${orange}TERMINAL KALI LINUX${blanc}  🪄             ${rouge_vif}║${fin}"
+    echo -e "${rouge_vif}   ║${blanc}    🐉  TERMINAL KALI LINUX  🪄             ${rouge_vif}║${fin}"
     echo -e "${rouge_vif}   ╚══════════════════════════════════════════╝${fin}"
     echo -e "${fin}   IA active : ${vert}$(modele_actif)${fin}\n"
     echo -e "   ${orange}a) 🖥  BUREAU — choisir un outil et copier sa commande${fin}"
