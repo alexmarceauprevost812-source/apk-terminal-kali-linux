@@ -221,6 +221,28 @@ résultat final. (Aussi `kali cours101`, `apps cours101`, et la touche « c »
 du menu `magie`.) Le contenu est dans `config/cours101.txt`, mis à jour par
 `magie-update` sans réinstaller l'APK.
 
+## 🧭 Parcours guidés — plusieurs outils enchaînés, étape par étape
+
+Après une commande, on ne sait pas toujours laquelle taper ensuite. Les
+**parcours** enchaînent PLUSIEURS outils dans l'ordre logique d'un vrai test
+de sécurité, avec à chaque étape l'explication de **pourquoi** elle suit la
+précédente — un but éducatif : comprendre comment un attaquant procéderait,
+pour mieux savoir protéger vos propres appareils.
+
+```bash
+parcours              # liste des parcours disponibles
+parcours reseau       # ex. : nmap (découverte) → nmap -sV → nikto → hydra
+```
+
+Comme `guide suivre` et `cours101 commandes` : chaque commande de l'étape se
+copie automatiquement, vous la collez et l'essayez, puis Entrée passe à
+l'étape suivante — jusqu'au résultat final. (Aussi `kali parcours`, `apps
+parcours`, et la touche « p » du menu `magie`.) Le contenu est dans
+`config/parcours.txt`.
+
+> ⚠️ N'utilisez ces outils que sur VOS PROPRES appareils/réseaux, ou avec une
+> autorisation écrite explicite du propriétaire.
+
 ## 📚 Catalogue des outils (par catégorie)
 
 Comme sur <https://www.kali.org/tools/>, les outils sont **classés par catégorie**
@@ -449,6 +471,8 @@ bin/kali                terminal Kali Linux (installation, mise à jour, auto)
 bin/guide               guide : ce que fait chaque outil Kali
 bin/catalogue           catalogue des outils par catégorie (installe)
 bin/bibliotheque        mes outils installés, classés par famille
+bin/cours101            cours 101 : débuter pas à pas (terminal, Linux, Kali, IA)
+bin/parcours            parcours guidés : plusieurs outils enchaînés, étape par étape
 bin/bureau              bureau graphique XFCE (via VNC)
 bin/apps                bureau tactile : choisir un outil et copier sa commande
 bin/copier              met une commande dans le presse-papier (OSC 52 / xclip)
@@ -464,6 +488,8 @@ config/kali-outils.txt  outils Kali installés automatiquement
 config/kali-guide.txt   guide (rôle + exemples) de chaque outil
 config/kali-catalogue.txt outils classés par catégorie (kali.org/tools)
 config/kali-bibliotheque.txt familles de la bibliothèque (attaque, défense…)
+config/cours101.txt     contenu du cours 101 (10 chapitres)
+config/parcours.txt     parcours guidés (étapes multi-outils + explications)
 config/fond-ecran.png   fond d'écran par défaut du bureau
 apk/icone.png           (optionnel) icône de l'application
 apk/construire.sh       construit l'APK Terminal Magique

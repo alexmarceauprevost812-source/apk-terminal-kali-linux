@@ -4,6 +4,7 @@
 #        COPIE toute seule, prête à coller dans le terminal (plus besoin de taper).
 #   apps            → ouvre le bureau
 #   apps cours101   → ouvre directement le cours 101 (débuter pas à pas)
+#   apps parcours   → ouvre directement les parcours guidés (plusieurs outils enchaînés)
 #   apps guide      → ouvre directement le guide des outils
 #   apps biblio     → ouvre directement la bibliothèque
 #   apps catalogue  → ouvre directement le catalogue
@@ -178,6 +179,20 @@ app_cours101() {
   fi
 }
 
+# --- App : Parcours guidés (plusieurs outils enchaînés) -------------------
+app_parcours() {
+  if command -v parcours >/dev/null 2>&1; then
+    titre "🧭 Parcours guidés"
+    parcours
+    echo
+    read -rp "$(echo -e "${blanc}   Lequel lancer ? (Entrée pour revenir) : ${fin}")" pr
+    [ -n "$pr" ] && parcours "$pr"
+    pause
+  else
+    echo -e "${jaune}Commande « parcours » indisponible.${fin}"; pause
+  fi
+}
+
 # --- App : Commandes rapides (les plus utiles, prêtes à coller) ----------
 app_rapides() {
   choisir_commande "⭐ Commandes rapides" \
@@ -201,22 +216,24 @@ bureau_accueil() {
     titre "choisis une application (tape son numéro)"
     echo
     echo -e "   🎓 ${lime} 1${fin})  ${gras}Cours 101${fin}             ${gris}débuter pas à pas (terminal, Linux, Kali, IA)${fin}"
-    echo -e "   📖 ${lime} 2${fin})  ${gras}Guide des outils${fin}      ${gris}ce que fait chaque outil + commandes${fin}"
-    echo -e "   🔎 ${lime} 3${fin})  ${gras}Ma bibliothèque${fin}       ${gris}mes outils installés, par famille${fin}"
-    echo -e "   🧰 ${lime} 4${fin})  ${gras}Catalogue${fin}             ${gris}trouver et installer un outil${fin}"
-    echo -e "   ⭐ ${lime} 5${fin})  ${gras}Commandes rapides${fin}     ${gris}les commandes les plus utiles à copier${fin}"
-    echo -e "   🐉 ${lime} 6${fin})  ${gras}Terminal Kali${fin}         ${gris}revenir au terminal${fin}"
+    echo -e "   🧭 ${lime} 2${fin})  ${gras}Parcours guidés${fin}       ${gris}plusieurs outils enchaînés, étape par étape${fin}"
+    echo -e "   📖 ${lime} 3${fin})  ${gras}Guide des outils${fin}      ${gris}ce que fait chaque outil + commandes${fin}"
+    echo -e "   🔎 ${lime} 4${fin})  ${gras}Ma bibliothèque${fin}       ${gris}mes outils installés, par famille${fin}"
+    echo -e "   🧰 ${lime} 5${fin})  ${gras}Catalogue${fin}             ${gris}trouver et installer un outil${fin}"
+    echo -e "   ⭐ ${lime} 6${fin})  ${gras}Commandes rapides${fin}     ${gris}les commandes les plus utiles à copier${fin}"
+    echo -e "   🐉 ${lime} 7${fin})  ${gras}Terminal Kali${fin}         ${gris}revenir au terminal${fin}"
     echo
     echo -e "   ${gris}0) Fermer le bureau${fin}"
     echo -e "\n   ${blanc}💡 Choisis un outil → sa commande se copie → colle-la dans le terminal.${fin}"
     read -rp "   > " c || { clear 2>/dev/null; return 0; }
     case "$c" in
       1) app_cours101 ;;
-      2) app_guide ;;
-      3) app_biblio ;;
-      4) app_catalogue ;;
-      5) app_rapides ;;
-      6|q|Q|quitter) titre "Terminal"; echo -e "   ${lime}➜ Te voilà de retour dans le terminal.${fin}\n"; return 0 ;;
+      2) app_parcours ;;
+      3) app_guide ;;
+      4) app_biblio ;;
+      5) app_catalogue ;;
+      6) app_rapides ;;
+      7|q|Q|quitter) titre "Terminal"; echo -e "   ${lime}➜ Te voilà de retour dans le terminal.${fin}\n"; return 0 ;;
       0|exit) clear 2>/dev/null; return 0 ;;
       "") ;;
       *) : ;;
@@ -227,6 +244,7 @@ bureau_accueil() {
 case "${1:-}" in
   ""|bureau) bureau_accueil ;;
   cours101) app_cours101 ;;
+  parcours) app_parcours ;;
   guide) app_guide ;;
   biblio|bibliotheque|bibliothèque) app_biblio ;;
   catalogue) app_catalogue ;;

@@ -12,6 +12,7 @@
 #   kali catalogue       → parcourir/installer les outils par catégorie
 #   kali bibliotheque    → mes outils installés, classés par famille
 #   kali cours101        → cours pas à pas pour débuter
+#   kali parcours        → parcours guidés (plusieurs outils enchaînés)
 #   kali bureau          → bureau graphique XFCE (via VNC)
 #   kali auto on|off     → ouvrir Kali automatiquement à chaque nouvelle session
 #   kali -- commande     → lancer une commande dans Kali
@@ -200,6 +201,7 @@ case "${1:-}" in
   catalogue) shift; exec catalogue "$@" ;;
   bibliotheque|bibliothèque) shift; exec bibliotheque "$@" ;;
   cours101) shift; exec cours101 "$@" ;;
+  parcours) shift; exec parcours "$@" ;;
   bureau) shift; exec bureau "$@" ;;
   auto)
     mkdir -p "$DOSSIER"

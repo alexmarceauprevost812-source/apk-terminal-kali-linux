@@ -1,0 +1,129 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# parcours — parcours guidés qui enchaînent PLUSIEURS outils, étape par étape,
+#            avec l'explication de pourquoi chaque étape suit la précédente.
+#            But éducatif : comprendre comment un attaquant procéderait, pour
+#            mieux savoir protéger VOS PROPRES appareils.
+#   parcours              → liste des parcours disponibles
+#   parcours reseau       → lance le parcours « reseau », guidé une étape à la fois
+# ⚠️ N'utilisez ces outils que sur VOS PROPRES appareils/réseaux, ou avec
+# une autorisation écrite explicite du propriétaire.
+set -uo pipefail
+
+PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
+lime='\033[1;38;2;50;255;0m'; blanc='\033[0;97m'; gras='\033[1;97m'; jaune='\033[1;33m'; rouge='\033[1;31m'; gris='\033[0;90m'; fin='\033[0m'
+
+COPIER="$(command -v copier || true)"
+[ -z "$COPIER" ] && [ -x "$(dirname "$(readlink -f "$0")")/copier" ] && COPIER="$(dirname "$(readlink -f "$0")")/copier"
+
+fichier_parcours() {
+  for f in "$PREFIX/share/magie/config/parcours.txt" \
+           "/usr/local/share/magie/config/parcours.txt" \
+           "$HOME/.magie/config/parcours.txt" \
+           "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." 2>/dev/null && pwd)/config/parcours.txt"; do
+    [ -f "$f" ] && { echo "$f"; return 0; }
+  done
+  return 1
+}
+FICHIER="$(fichier_parcours)" || { echo -e "${rouge}✖ Parcours introuvable (config/parcours.txt).${fin}"; exit 1; }
+
+titre_parcours() { awk -v n="@$1|" -F'|' 'index($0,n)==1{print $2; exit}' "$FICHIER"; }
+ids_parcours() { grep '^@' "$FICHIER" | sed -E 's/^@([^|]+)\|.*/\1/'; }
+
+# Corps d'un parcours (tout ce qui suit @id| jusqu'au prochain @ ou la fin).
+texte_parcours() {
+  awk -v n="@$1|" '
+    index($0,n)==1 { r=1; next }
+    /^@/ && r { exit }
+    r { print }
+  ' "$FICHIER"
+}
+
+lister() {
+  echo -e "${lime}🧭 Parcours guidés — plusieurs outils enchaînés, à but éducatif${fin}\n"
+  local id
+  while IFS= read -r id; do
+    [ -z "$id" ] && continue
+    printf "  ${lime}%-10s${fin} %s\n" "$id" "$(titre_parcours "$id")"
+  done < <(ids_parcours)
+  echo -e "\n  ${blanc}Lancer :  parcours <id>${fin}"
+  echo -e "  ${jaune}⚠️ Uniquement sur VOS PROPRES appareils/réseaux, ou avec autorisation écrite.${fin}"
+}
+
+# Parcourt les étapes (marquées « ## titre ») d'un parcours : explication + commandes
+# de l'étape, une étape à la fois, jusqu'au résultat final.
+suivre_parcours() {
+  local id="$1"
+  local titre; titre="$(titre_parcours "$id")"
+  if [ -z "$titre" ]; then
+    echo -e "${rouge}✖ Parcours « $id » introuvable. Liste : parcours${fin}"; return 1
+  fi
+
+  # Découpe le corps du parcours en étapes sur les lignes "## ...".
+  local -a titres_etapes=() corps_etapes=()
+  local etape_titre="" etape_corps="" dans_etape=0 ligne
+  while IFS= read -r ligne; do
+    if [[ "$ligne" == "## "* ]]; then
+      if [ "$dans_etape" -eq 1 ]; then
+        titres_etapes+=("$etape_titre")
+        corps_etapes+=("$etape_corps")
+      fi
+      etape_titre="${ligne#\#\# }"
+      etape_corps=""
+      dans_etape=1
+    elif [ "$dans_etape" -eq 1 ]; then
+      etape_corps+="$ligne"$'\n'
+    fi
+  done < <(texte_parcours "$id")
+  [ "$dans_etape" -eq 1 ] && { titres_etapes+=("$etape_titre"); corps_etapes+=("$etape_corps"); }
+
+  local total="${#titres_etapes[@]}"
+  if [ "$total" -eq 0 ]; then
+    echo -e "${jaune}Aucune étape pour « $id ».${fin}"; return 1
+  fi
+
+  clear 2>/dev/null || true
+  echo -e "${lime}🧭 Parcours guidé — $titre${fin}"
+  echo -e "${jaune}⚠️ Uniquement sur VOS PROPRES appareils/réseaux, ou avec autorisation écrite. But éducatif :${fin}"
+  echo -e "${jaune}   comprendre comment un attaquant procéderait, pour mieux vous protéger.${fin}"
+  echo -e "${blanc}Chaque commande se copie automatiquement ; collez-la, essayez-la, lisez le résultat,${fin}"
+  echo -e "${blanc}puis Entrée pour l'étape suivante. 'q' pour arrêter avant la fin.${fin}"
+
+  local i=0
+  while [ "$i" -lt "$total" ]; do
+    echo -e "\n${gras}────────────────────────────────────────${fin}"
+    echo -e "${blanc}Étape $((i+1))/$total :${fin} ${gras}${titres_etapes[$i]}${fin}\n"
+    printf '%s' "${corps_etapes[$i]}" | grep -v '^\$'
+
+    local -a cmds=()
+    local cl
+    while IFS= read -r cl; do [ -n "$cl" ] && cmds+=("$cl"); done \
+      < <(printf '%s' "${corps_etapes[$i]}" | sed -n 's/^\$[[:space:]]*//p' | sed -E 's/[[:space:]]+#.*$//')
+    local j
+    for j in "${!cmds[@]}"; do
+      echo
+      echo -e "${blanc}Commande :${fin} ${lime}${cmds[$j]}${fin}"
+      if [ -n "$COPIER" ] && "$COPIER" "${cmds[$j]}" 2>/dev/null; then
+        echo -e "${lime}✔ Copiée dans le presse-papier.${fin}"
+      else
+        echo -e "${jaune}➜ Sélectionnez et copiez la ligne verte ci-dessus.${fin}"
+      fi
+    done
+
+    i=$((i+1))
+    if [ "$i" -lt "$total" ]; then
+      echo
+      read -rp "$(echo -e "${blanc}Entrée pour l'étape suivante (${titres_etapes[$i]}), ou 'q' pour arrêter : ${fin}")" rep
+      [ "$rep" = "q" ] && break
+    fi
+  done
+  echo -e "\n${gras}────────────────────────────────────────${fin}"
+  echo -e "${lime}✔ Résultat : $i/$total étape(s) du parcours « $titre » complétée(s).${fin}"
+  echo -e "${blanc}Vous savez maintenant comment un attaquant procéderait à chaque étape —${fin}"
+  echo -e "${blanc}utilisez-le pour vérifier et renforcer VOS PROPRES appareils.${fin}"
+}
+
+case "${1:-}" in
+  ""|liste|list) lister ;;
+  -h|--help|aide) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) suivre_parcours "$1" ;;
+esac

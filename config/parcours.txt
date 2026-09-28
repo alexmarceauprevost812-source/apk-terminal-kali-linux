@@ -1,0 +1,53 @@
+# parcours — parcours guidés qui enchaînent PLUSIEURS outils, étape par étape,
+# à but éducatif : comprendre comment un attaquant procéderait, pour mieux savoir
+# se protéger. Format : @id|Titre puis des étapes "## Titre de l'étape", un texte
+# d'explication, et des lignes $ commande (sans indentation).
+# ⚠️ N'utilisez ces outils que sur VOS PROPRES appareils/réseaux, ou avec une
+# autorisation écrite explicite du propriétaire.
+
+@reseau|Parcours réseau : de la découverte à la faiblesse
+## 1. Découvrir ce qui répond sur le réseau
+On commence toujours par un scan de découverte : savoir quelles machines
+existent sur le réseau et quels ports (portes d'entrée) sont ouverts, avant
+de creuser plus loin. C'est la première étape de TOUT test de sécurité.
+$ nmap 192.168.1.0/24
+
+## 2. Identifier précisément ce qui tourne sur les ports ouverts
+Une fois qu'on sait quels ports sont ouverts, on identifie les logiciels et
+leurs versions exactes. C'est ce qui permet de savoir quoi tester ensuite —
+une vieille version d'un logiciel est souvent la porte d'entrée.
+$ nmap -sV 192.168.1.10
+
+## 3. Si un site web est trouvé (port 80/443) : chercher ses faiblesses
+Un serveur web est apparu à l'étape précédente ? nikto vérifie les erreurs
+de configuration et les vieux fichiers/logiciels connus pour être
+vulnérables sur ce serveur.
+$ nikto -h http://192.168.1.10
+
+## 4. Si un service de connexion est ouvert (SSH, FTP…) : tester les mots de passe faibles
+Un service comme SSH est ouvert ? hydra teste une liste de mots de passe
+pour repérer un compte protégé par un mot de passe trop faible. C'est la
+faille la plus commune et la plus simple à corriger une fois trouvée.
+$ hydra -l admin -P liste.txt ssh://192.168.1.10
+
+@web|Parcours site web : de la reconnaissance à l'injection
+## 1. Savoir quelles technologies utilise le site
+Avant de tester quoi que ce soit, on identifie le CMS (WordPress…), le
+serveur web et les frameworks utilisés — ça oriente tout le reste du test.
+$ whatweb https://mon-site.fr
+
+## 2. Chercher les fichiers et pages sensibles laissés accessibles
+gobuster essaie des noms de dossiers/fichiers courants (admin, backup,
+.git…) pour trouver ce qui ne devrait pas être visible publiquement.
+$ gobuster dir -u https://mon-site.fr -w /usr/share/wordlists/dirb/common.txt
+
+## 3. Chercher les faiblesses connues du serveur
+Avec les technologies identifiées, nikto vérifie les erreurs de
+configuration et les vulnérabilités déjà répertoriées pour ce serveur.
+$ nikto -h https://mon-site.fr
+
+## 4. Vérifier si le site est vulnérable à l'injection SQL
+Si le site utilise une base de données (souvent le cas), on vérifie que les
+formulaires/paramètres ne laissent pas passer de commandes vers celle-ci —
+c'est l'une des failles web les plus graves.
+$ sqlmap -u "https://mon-site.fr/page?id=1" --batch
