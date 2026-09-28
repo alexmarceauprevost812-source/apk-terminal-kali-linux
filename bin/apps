@@ -107,6 +107,7 @@ ecran_outil() {
   # Toujours proposer l'installation (commande prête à coller dans le terminal).
   cmds+=("catalogue installer $nom")
   cmds+=("guide $nom")
+  cmds+=("guide suivre $nom")
   local r; r="$(resume_de "$nom")"
   choisir_commande "$nom${r:+ — $r}" "${cmds[@]}"
 }

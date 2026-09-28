@@ -264,6 +264,17 @@ guide web        # cherche « web » dans les noms, catégories et résumés
 (aussi `kali guide` et l'option 3 du menu `magie`). La liste se modifie dans
 `config/kali-guide.txt`.
 
+**Guide pas à pas** : pour un outil, enchaînez ses commandes une par une, chacune
+copiée automatiquement, jusqu'au résultat final :
+
+```bash
+guide suivre nmap     # chaque commande-exemple de nmap, l'une après l'autre
+```
+
+Collez (appui long → Coller), essayez, puis Entrée affiche et copie la commande
+suivante — jusqu'à la fin. (Aussi disponible depuis `apps` : chaque outil propose
+cette option dans sa liste de commandes à copier.)
+
 ## 🖥️ Bureau — choisir un outil et copier sa commande
 
 Un **bureau tactile** dans le terminal, façon écran d'ordinateur : au lieu de taper

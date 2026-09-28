@@ -5,6 +5,8 @@
 #   guide web            → cherche « web » dans les noms, catégories et résumés
 #   guide copier nmap    → copie la 1re commande-exemple (prête à coller)
 #   guide copier nmap 2  → copie la 2e commande-exemple
+#   guide suivre nmap    → guide pas à pas : chaque commande de l'outil, une à la
+#                          fois, copiée automatiquement, jusqu'au résultat final
 set -uo pipefail
 
 PREFIX="${PREFIX:-/data/data/com.termux/files/usr}"
@@ -51,10 +53,58 @@ fiche() {
     aff && NF{ print "   " $0 }
     END{ if(!found) exit 2 }
   ' "$FICHIER" && trouve=1
+  if [ "$trouve" -eq 1 ]; then
+    echo -e "   ${blanc}💡 Pas à pas, une commande à la fois, prête à coller :  guide suivre $cible${fin}"
+  fi
   if [ "$trouve" -eq 0 ]; then
     echo "Aucun outil « $cible » dans le guide. Liste : guide"
     return 1
   fi
+}
+
+# Toutes les commandes-exemples d'un outil, dans l'ordre, sans commentaire de fin.
+commandes_outil() {
+  local outil="$1"
+  awk -v cible="$outil" '
+    /^@/{ n=$0; sub(/^@[ ]*/,"",n); sub(/[ ]*\|.*/,"",n); gsub(/[ ]+$/,"",n);
+          aff=(tolower(n)==tolower(cible)) }
+    aff && /^\$/{ l=$0; sub(/^\$[ ]*/,"",l); sub(/[ ]+#.*/,"",l); print l }
+  ' "$FICHIER"
+}
+
+# Guide pas à pas : copie chaque commande de l'outil l'une après l'autre.
+# Après chaque commande copiée, la SUIVANTE est déjà affichée/prête, jusqu'au résultat final.
+guider() {
+  local outil="$1"
+  local -a cmds=()
+  local ligne
+  while IFS= read -r ligne; do [ -n "$ligne" ] && cmds+=("$ligne"); done < <(commandes_outil "$outil")
+  local total="${#cmds[@]}"
+  if [ "$total" -eq 0 ]; then
+    echo -e "${jaune}Aucune commande-exemple pour « $outil ». Liste : guide${fin}"; return 1
+  fi
+  clear 2>/dev/null || true
+  echo -e "${lime}🐉 Guide pas à pas — $outil${fin}"
+  echo -e "${blanc}Chaque commande se copie automatiquement ; collez-la (appui long → Coller), essayez-la,${fin}"
+  echo -e "${blanc}puis Entrée pour passer à la suivante. 'q' pour arrêter avant la fin.${fin}\n"
+  local i=0
+  while [ "$i" -lt "$total" ]; do
+    echo -e "${gras}────────────────────────────────────────${fin}"
+    echo -e "${blanc}Commande $((i+1))/$total :${fin}"
+    echo -e "${lime}${cmds[$i]}${fin}"
+    if command -v copier >/dev/null 2>&1 && copier "${cmds[$i]}"; then
+      echo -e "${lime}✔ Copiée dans le presse-papier.${fin}"
+    else
+      echo -e "${jaune}➜ Sélectionnez et copiez la ligne verte ci-dessus.${fin}"
+    fi
+    i=$((i+1))
+    if [ "$i" -lt "$total" ]; then
+      read -rp "$(echo -e "${blanc}Entrée pour la commande suivante (${cmds[$i]}), ou 'q' pour arrêter : ${fin}")" rep
+      [ "$rep" = "q" ] && break
+    fi
+  done
+  echo -e "${gras}────────────────────────────────────────${fin}"
+  echo -e "${lime}✔ Résultat : $i/$total commande(s) de « $outil » essayée(s).${fin}"
 }
 
 # Copie une commande-exemple d'un outil, prête à coller dans le terminal.
@@ -80,6 +130,7 @@ copier_exemple() {
 case "${1:-}" in
   ""|liste|list) lister ;;
   copier|copie|-c) shift; copier_exemple "$@" ;;
-  -h|--help|aide) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
+  suivre|guider) shift; guider "$1" ;;
+  -h|--help|aide) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//' ;;
   *) fiche "$1" ;;
 esac
