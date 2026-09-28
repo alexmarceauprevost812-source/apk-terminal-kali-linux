@@ -3,7 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff8c00">
 <title>Terminal Magique</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icones/icone-192.png">
+<link rel="apple-touch-icon" href="icones/icone-192.png">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,6 +19,7 @@
     <button class="onglet" data-onglet="guide">📖 Guide</button>
     <button class="onglet" data-onglet="reglages">⚙️ Réglages</button>
   </nav>
+  <button id="bouton-installer" class="bouton bouton-installer" hidden>⬇️ Installer</button>
 </header>
 
 <main>
@@ -45,6 +50,15 @@
 
   <section id="vue-reglages" class="vue">
     <h2>Réglages</h2>
+
+    <div class="carte">
+      <h3>⬇️ Installer sur l'écran d'accueil</h3>
+      <p class="explication">Optionnel : vous pouvez garder cette page dans le navigateur, ou l'installer
+      comme une appli (icône sur l'écran d'accueil, ouverture en plein écran, sans barre d'adresse).
+      Ça ne télécharge rien de plus — c'est la même page, juste un raccourci.</p>
+      <button id="installer-reglages" class="bouton" hidden>⬇️ Installer l'application</button>
+      <p id="installer-statut" class="statut"></p>
+    </div>
 
     <div class="carte">
       <h3>🧠 IA locale</h3>

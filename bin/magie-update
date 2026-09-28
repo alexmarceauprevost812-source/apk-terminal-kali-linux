@@ -57,9 +57,12 @@ maj_commandes() {
     curl -fsSL --max-time 15 "$DEPOT_RAW/config/$f" -o "$MAGIE/config/$f" 2>/dev/null || true
   done
   curl -fsSL --max-time 20 "$DEPOT_RAW/config/fond-ecran.png" -o "$MAGIE/config/fond-ecran.png" 2>/dev/null || true
-  mkdir -p "$MAGIE/web"
-  for f in index.html style.css app.js serveur.py; do
+  mkdir -p "$MAGIE/web/icones"
+  for f in index.html style.css app.js serveur.py manifest.json sw.js; do
     curl -fsSL --max-time 15 "$DEPOT_RAW/web/$f" -o "$MAGIE/web/$f" 2>/dev/null || true
+  done
+  for f in icone-192.png icone-512.png icone-maskable-512.png; do
+    curl -fsSL --max-time 15 "$DEPOT_RAW/web/icones/$f" -o "$MAGIE/web/icones/$f" 2>/dev/null || true
   done
   cp "$MAGIE/config/modeles.txt" "$DOSSIER/modeles.txt" 2>/dev/null || true
   rm -rf "$tmp"

@@ -372,8 +372,13 @@ application arreter    # arrête le serveur local
 Ça tourne **entièrement sur le téléphone** : un petit serveur local
 (`web/serveur.py`, Python seulement — déjà installé) sert la page à
 `http://127.0.0.1:8765`, uniquement accessible depuis le téléphone lui-même
-(rien n'est exposé au réseau). Pour l'avoir comme une appli séparée : dans le
-navigateur, menu → « Ajouter à l'écran d'accueil ».
+(rien n'est exposé au réseau).
+
+**Installer, ou rester dans le navigateur — au choix.** Un bouton
+« ⬇️ Installer » (en haut de l'écran, et dans Réglages) propose d'ajouter une
+icône sur l'écran d'accueil, pour l'ouvrir en plein écran comme une appli —
+mais rien n'oblige à installer : la page fonctionne aussi bien laissée
+simplement ouverte dans un onglet du navigateur. Ce n'est jamais imposé.
 
 > ⚠️ La clé API Claude est à vous (console.anthropic.com) — l'usage de
 > l'API Anthropic peut être payant selon votre compte.
@@ -509,6 +514,9 @@ web/index.html          interface graphique : structure (onglets chat/guide/rég
 web/style.css           interface graphique : thème noir/orange/blanc + code coloré
 web/app.js              interface graphique : chat, coloration du code, guide au doigt
 web/serveur.py          serveur local (Python) : relaie vers Ollama et/ou Claude
+web/manifest.json       fiche d'installation (icône, nom, couleurs) — optionnelle
+web/sw.js               service worker minimal (rend l'installation possible, sans cache)
+web/icones/*.png        icônes de l'application (192, 512, 512 adaptative)
 bin/bureau              bureau graphique XFCE (via VNC)
 bin/apps                bureau tactile : choisir un outil et copier sa commande
 bin/copier              met une commande dans le presse-papier (OSC 52 / xclip)

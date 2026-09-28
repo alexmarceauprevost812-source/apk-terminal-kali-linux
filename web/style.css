@@ -52,6 +52,16 @@ body {
 
 .onglets { display: flex; gap: 6px; }
 
+.bouton-installer {
+  background: transparent;
+  color: var(--orange);
+  border: 1px solid var(--orange);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 .onglet {
   background: transparent;
   color: var(--gris);

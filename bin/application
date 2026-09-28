@@ -56,7 +56,7 @@ demarrer() {
   else
     echo -e "${blanc}   Ouvrez manuellement dans votre navigateur :  http://127.0.0.1:$PORT${fin}"
   fi
-  echo -e "${blanc}Pour l'ajouter à l'écran d'accueil : menu du navigateur → « Ajouter à l'écran d'accueil ».${fin}"
+  echo -e "${blanc}Un bouton « Installer » (optionnel) permet d'ajouter une icône à l'écran d'accueil.${fin}"
   echo -e "${blanc}Pour arrêter :  application arreter${fin}"
 }
 

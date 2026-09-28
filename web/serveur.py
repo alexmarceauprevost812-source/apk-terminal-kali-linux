@@ -155,24 +155,41 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(corps)
 
     def _fichier_statique(self, nom):
+        # nom vient de self.path (client local uniquement) ; on refuse toute
+        # tentative de sortir du dossier web/ (ex. "..").
+        if ".." in nom.split("/"):
+            self.send_error(403)
+            return
         chemin = os.path.join(SCRIPT_DIR, nom)
         if not os.path.isfile(chemin):
             self.send_error(404)
             return
-        types = {".html": "text/html", ".css": "text/css", ".js": "application/javascript"}
+        types = {
+            ".html": "text/html", ".css": "text/css", ".js": "application/javascript",
+            ".json": "application/json", ".png": "image/png",
+        }
         ext = os.path.splitext(nom)[1]
+        binaire = ext == ".png"
         with open(chemin, "rb") as f:
             corps = f.read()
         self.send_response(200)
-        self.send_header("Content-Type", types.get(ext, "application/octet-stream") + "; charset=utf-8")
+        ctype = types.get(ext, "application/octet-stream")
+        if not binaire:
+            ctype += "; charset=utf-8"
+        self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(corps)))
         self.end_headers()
         self.wfile.write(corps)
 
+    FICHIERS_RACINE = {"/style.css": "style.css", "/app.js": "app.js",
+                        "/manifest.json": "manifest.json", "/sw.js": "sw.js"}
+
     def do_GET(self):
         if self.path in ("/", "/index.html"):
             self._fichier_statique("index.html")
-        elif self.path in ("/style.css", "/app.js"):
+        elif self.path in self.FICHIERS_RACINE:
+            self._fichier_statique(self.FICHIERS_RACINE[self.path])
+        elif self.path.startswith("/icones/") and self.path.endswith(".png"):
             self._fichier_statique(self.path.lstrip("/"))
         elif self.path == "/api/guide":
             self._json(parser_guide())

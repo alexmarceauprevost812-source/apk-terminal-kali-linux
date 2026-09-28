@@ -4,6 +4,47 @@
 (function () {
   "use strict";
 
+  // Service worker minimal (aucune mise en cache) : sert uniquement à rendre
+  // l'installation possible si l'utilisateur le souhaite ; jamais imposé.
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  }
+
+  // --- Installer sur l'écran d'accueil (toujours optionnel) ---------------
+  let evenementInstall = null;
+  const boutonEntete = document.getElementById("bouton-installer");
+  const boutonReglages = document.getElementById("installer-reglages");
+  const statutInstall = document.getElementById("installer-statut");
+
+  window.addEventListener("beforeinstallprompt", (ev) => {
+    ev.preventDefault();
+    evenementInstall = ev;
+    boutonEntete.hidden = false;
+    boutonReglages.hidden = false;
+  });
+
+  async function proposerInstallation() {
+    if (!evenementInstall) return;
+    boutonEntete.hidden = true;
+    boutonReglages.hidden = true;
+    evenementInstall.prompt();
+    const choix = await evenementInstall.userChoice;
+    if (choix.outcome !== "accepted") {
+      // L'utilisateur a refusé — on redonne le choix plus tard.
+      boutonEntete.hidden = false;
+      boutonReglages.hidden = false;
+    }
+    evenementInstall = null;
+  }
+  boutonEntete.addEventListener("click", proposerInstallation);
+  boutonReglages.addEventListener("click", proposerInstallation);
+
+  window.addEventListener("appinstalled", () => {
+    boutonEntete.hidden = true;
+    boutonReglages.hidden = true;
+    if (statutInstall) statutInstall.textContent = "✔ Installée — retrouvez-la sur votre écran d'accueil.";
+  });
+
   const onglets = document.querySelectorAll(".onglet");
   const vues = { chat: "vue-chat", guide: "vue-guide", reglages: "vue-reglages" };
 
