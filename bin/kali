@@ -66,9 +66,16 @@ diagnostic() {
   echo -e "${blanc}• Kali déjà installé :${fin} $(kali_installe && echo oui || echo non)"
 }
 
+# Le miroir choisi par http.kali.org est parfois injoignable depuis un téléphone
+# (« Unable to connect to mirror… » : aucun outil ne s'installe). On fixe un miroir qui répond.
+miroir_kali() {
+  proot-distro login "$NOM" -- bash -c "sed -i 's#^URIs: .*#URIs: http://kali.download/kali/#' /etc/apt/sources.list.d/kali.sources" >/dev/null 2>&1 || true
+}
+
 # Installe les outils Kali (liste par défaut, ou le métapaquet complet).
 installer_outils() {
   kali_installe || { echo -e "${rouge}✖ Installez d'abord Kali : kali installer${fin}"; return 1; }
+  miroir_kali
   local paquets
   if [ "${1:-}" = complet ]; then
     paquets="kali-linux-headless"
@@ -124,6 +131,7 @@ installer() {
   fi
 
   echo -e "${lime}➜ Configuration de Kali (mise à jour, outils de base)…${fin}"
+  miroir_kali
   proot-distro login "$NOM" -- bash -c '
     export DEBIAN_FRONTEND=noninteractive
     apt-get update &&
@@ -192,6 +200,7 @@ case "${1:-}" in
   francais|français) kali_installe || installer || exit 1; francais_kali ;;
   maj)
     kali_installe || installer || exit 1
+    miroir_kali
     proot-distro login "$NOM" -- bash -c 'apt-get update && DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y'
     francais_kali
     couleurs_kali ;;
